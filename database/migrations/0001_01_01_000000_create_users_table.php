@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            
+            // --- Kolom baru yang ditambahkan ---
+            $table->string('nisn')->unique()->nullable(); 
+            $table->string('asal_sekolah')->nullable();
+            // -----------------------------------
+            
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
