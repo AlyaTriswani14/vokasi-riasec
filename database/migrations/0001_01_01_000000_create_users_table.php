@@ -18,6 +18,7 @@ return new class extends Migration
             // --- Kolom baru yang ditambahkan ---
             $table->string('nisn')->unique()->nullable(); 
             $table->string('asal_sekolah')->nullable();
+            $table->string('role')->default('siswa'); // <-- KOLOM ROLE KHUSUS KITA SELIPKAN DI SINI
             // -----------------------------------
             
             $table->string('email')->unique();

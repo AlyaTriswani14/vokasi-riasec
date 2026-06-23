@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\KemendikdasmenAuthController;
 // Nanti uncomment ini kalau kamu sudah buat LoginController
 // use App\Http\Controllers\Auth\LoginController;
 
@@ -11,7 +12,7 @@ Route::get('/', function () {
     return redirect()->route('register');
 });
 
-// Authentication Routes
+// Authentication Routes (Siswa)
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
@@ -53,3 +54,18 @@ Route::prefix('assessment')->name('assessment.')->group(function () {
     Route::get('/scoring', [AssessmentController::class, 'scoring'])->name('scoring'); 
     Route::post('/reset', [AssessmentController::class, 'reset'])->name('reset');
 });
+
+// ==========================================
+// KELOMPOK RUTE ADMIN PUSAT KEMENDIKDASMEN
+// ==========================================
+
+// Jalur halaman login (GET) - Mengarah tepat ke auth.login-admin
+Route::get('/kemendikdasmen/login', function () {
+    return view('auth.login-admin');
+})->name('kemendikdasmen.login');
+
+// Jalur memproses data login (POST)
+Route::post('/kemendikdasmen/login', [KemendikdasmenAuthController::class, 'login'])->name('kemendikdasmen.login.submit');
+
+// Jalur untuk logout (POST)
+Route::post('/kemendikdasmen/logout', [KemendikdasmenAuthController::class, 'logout'])->name('kemendikdasmen.logout');
