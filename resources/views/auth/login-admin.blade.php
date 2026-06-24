@@ -148,7 +148,7 @@
                 </p>
             </header>
             
-            <form action="{{ route('kemendikdasmen.login.submit') }}" method="POST" class="space-y-6">
+            <form action="{{ route('kemendikdasmen.login') }}" method="POST" class="space-y-6">
                 @csrf
                 
                 @if ($errors->any())
