@@ -39,6 +39,13 @@
                 <h1 class="text-xl md:text-2xl font-bold text-[#003E70]">Pilih Jalanmu</h1>
             </header>
 
+            <!-- Badge Jenjang (SMP/SMK) -->
+            <div class="mb-4 -mt-2">
+                <span class="inline-block bg-[#E6FFFA] text-[#00A389] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Mendaftar sebagai Siswa {{ strtoupper(session('jenjang', 'smp')) }}
+                </span>
+            </div>
+
             <!-- Responsive Grid (1 column on mobile, 2 columns on desktop) -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-10 items-start">
                 
@@ -78,6 +85,7 @@
                     <!-- Registration Form (2-column layout inside on desktop) -->
                     <form action="{{ url('/register') }}" method="POST" class="space-y-4">
                         @csrf
+                        <input type="hidden" name="jenjang" value="{{ session('jenjang', 'smp') }}">
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- NAMA LENGKAP -->

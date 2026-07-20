@@ -3,140 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profil Siswa - Pilih Jalanmu</title>
+    <title>Profil - Bakat Minat</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-[#f8fafc] font-sans text-gray-800 min-h-screen flex flex-col relative pb-24">
 
-    <div class="w-full flex items-center p-4 md:px-8 bg-[#f8fafc] sticky top-0 z-50">
-        <a href="{{ route('dashboard') }}" class="text-[#003366] hover:text-[#00558f] mr-4 transition-colors">
-            <i class="fa-solid fa-arrow-left text-lg"></i>
-        </a>
-        <h1 class="text-[#003366] font-bold text-lg">Profil Siswa</h1>
-    </div>
-
     @php
-        // Mengambil nama dari Auth jika sudah login, jika belum pakai nama default
-        $namaUser = Auth::check() ? Auth::user()->name : 'Poppy Putri Sibuea';
-        $nisn = '0082341991';
-        $kelas = '9-B';
+        $isSmk = (Auth::user()->jenjang ?? 'smp') === 'smk';
+        $gradFrom = $isSmk ? '#2F6FED' : '#FF7A45';
+        $gradTo = $isSmk ? '#22C1C3' : '#FFB13D';
+        $accentText = $isSmk ? 'text-[#2F6FED]' : 'text-[#c2410c]';
+        $accentBg = $isSmk ? 'bg-blue-50' : 'bg-orange-50';
+        $accentBorder = $isSmk ? 'border-blue-100' : 'border-orange-100';
+        $accentBtn = $isSmk ? 'bg-[#2F6FED] hover:bg-[#255bc4]' : 'bg-[#FF7A45] hover:bg-[#e8672f]';
+        $badgeLabel = $isSmk ? 'Siswa SMK' : 'Siswa SMP/MTs';
+        $kelasOptions = $isSmk ? [10, 11, 12, 13] : [7, 8, 9];
+
+        $tipeLabels = [
+            'r' => 'Realistic', 'i' => 'Investigative', 'a' => 'Artistic',
+            's' => 'Social', 'e' => 'Enterprising', 'c' => 'Conventional',
+        ];
+        $top3 = [];
+        if ($hasilTes) {
+            $skorArr = [
+                'r' => $hasilTes->skor_r, 'i' => $hasilTes->skor_i, 'a' => $hasilTes->skor_a,
+                's' => $hasilTes->skor_s, 'e' => $hasilTes->skor_e, 'c' => $hasilTes->skor_c,
+            ];
+            $persenArr = [];
+            foreach ($skorArr as $kode => $skor) {
+                $persenArr[$kode] = round(($skor / 7) * 100);
+            }
+            arsort($persenArr);
+            $top3 = array_slice($persenArr, 0, 3, true);
+        }
     @endphp
 
-    <main class="flex-grow w-full max-w-3xl mx-auto px-4 pt-2 pb-12 flex flex-col">
+    <div class="w-full flex justify-between items-center p-4 md:px-8 bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-2 text-[#003366] font-bold text-lg">
+            <i class="fa-solid fa-graduation-cap"></i> <span>Bakat Minat</span>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-[#00558f] text-white flex items-center justify-center font-bold text-xs">
+            {{ Auth::check() ? strtoupper(substr(Auth::user()->name, 0, 2)) : 'PP' }}
+        </div>
+    </div>
 
-        <div class="flex flex-col items-center mt-4 mb-8">
-            <div class="relative w-20 h-20 md:w-24 md:h-24 mb-3">
-                <div class="w-full h-full rounded-full border-4 border-white shadow-sm overflow-hidden bg-[#e0f2fe] flex items-center justify-center text-3xl text-[#00558f]">
-                    <i class="fa-solid fa-user"></i>
+    <main class="flex-grow w-full max-w-3xl mx-auto px-4 pt-6 pb-12 flex flex-col gap-5">
+
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-200 text-green-700 text-xs font-bold rounded-xl p-3">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        {{-- Ringkasan profil --}}
+        <div class="flex flex-col items-center text-center">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center text-2xl text-white font-bold shadow-sm mb-3" style="background: linear-gradient(135deg, {{ $gradFrom }}, {{ $gradTo }});">
+                {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+            </div>
+            <h2 class="text-xl font-extrabold text-gray-800">{{ Auth::user()->name }}</h2>
+            <span class="inline-block {{ $accentBg }} {{ $accentText }} text-[10px] font-bold px-2.5 py-1 rounded-full mt-1.5">{{ $badgeLabel }}</span>
+            <p class="text-xs text-gray-500 mt-2">
+                NISN: {{ Auth::user()->nisn ?: '-' }} &bull; {{ Auth::user()->asal_sekolah ?: '-' }}
+            </p>
+        </div>
+
+        {{-- Hasil tes terakhir --}}
+        <div class="bg-white border {{ $accentBorder }} rounded-2xl p-5 shadow-sm">
+            <div class="flex justify-between items-center mb-3">
+                <p class="text-[10px] font-bold text-gray-400 tracking-wider uppercase">Hasil Tes Terakhir</p>
+                <span class="text-[10px] text-gray-400 font-medium">
+                    {{ $hasilTes ? $hasilTes->created_at->format('d M Y') : '-' }}
+                </span>
+            </div>
+            @if($hasilTes)
+                <div class="grid grid-cols-3 gap-2">
+                    @foreach($top3 as $kode => $persen)
+                        <div class="rounded-xl {{ $accentBg }} p-3 text-center">
+                            <p class="text-[10px] font-bold text-gray-400 mb-0.5">#{{ $loop->iteration }}</p>
+                            <p class="font-extrabold {{ $accentText }} text-base">{{ strtoupper($kode) }}</p>
+                            <p class="text-[10px] font-medium text-gray-500 mb-1">{{ $tipeLabels[$kode] }}</p>
+                            <p class="text-xs font-bold text-gray-700">{{ $persen }}%</p>
+                        </div>
+                    @endforeach
                 </div>
-                <button class="absolute bottom-0 right-0 bg-[#003366] w-7 h-7 rounded-full flex items-center justify-center border-2 border-white text-white hover:bg-[#002244] transition-colors shadow-sm">
-                    <i class="fa-solid fa-pencil text-[10px]"></i>
+            @else
+                <p class="text-sm text-gray-500 text-center py-2">Belum ada hasil tes yang tersimpan.</p>
+            @endif
+        </div>
+
+        {{-- Data diri --}}
+        <div class="bg-white border {{ $accentBorder }} rounded-2xl p-5 shadow-sm">
+            <p class="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-4">Data Diri</p>
+
+            @if($errors->any())
+                <div class="bg-red-50 border border-red-200 text-red-600 text-xs rounded-xl p-3 mb-4">
+                    <ul class="list-disc list-inside">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('profil.update') }}" method="POST" class="flex flex-col gap-4">
+                @csrf
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5">Nama Lengkap</label>
+                    <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-1"
+                        style="--tw-ring-color: {{ $gradFrom }};">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5">Email</label>
+                    <input type="email" value="{{ Auth::user()->email }}" disabled
+                        class="w-full border border-gray-200 bg-gray-50 text-gray-400 rounded-xl px-4 py-2.5 text-sm">
+                    <p class="text-[10px] text-gray-400 mt-1 italic">Terhubung dari akun Google, tidak bisa diubah.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5">NISN</label>
+                    <input type="text" name="nisn" maxlength="10" value="{{ old('nisn', Auth::user()->nisn) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-1"
+                        style="--tw-ring-color: {{ $gradFrom }};">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5">Asal Sekolah</label>
+                    <input type="text" name="asal_sekolah" value="{{ old('asal_sekolah', Auth::user()->asal_sekolah) }}"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-1"
+                        style="--tw-ring-color: {{ $gradFrom }};">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1.5">Kelas</label>
+                    <select name="kelas"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-offset-1"
+                        style="--tw-ring-color: {{ $gradFrom }};">
+                        <option value="" disabled {{ Auth::user()->kelas ? '' : 'selected' }}>Pilih kelas</option>
+                        @foreach($kelasOptions as $k)
+                            <option value="{{ $k }}" {{ old('kelas', Auth::user()->kelas) == $k ? 'selected' : '' }}>Kelas {{ $k }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="{{ $accentBtn }} text-white font-bold text-sm py-3 rounded-xl transition-colors mt-1">
+                    Simpan Perubahan
                 </button>
-            </div>
-            <h2 class="text-xl md:text-2xl font-extrabold text-[#003366]">{{ $namaUser }}</h2>
-            <p class="text-xs md:text-sm text-gray-500 mt-1">NISN: {{ $nisn }} • Kelas {{ $kelas }}</p>
+            </form>
         </div>
 
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mb-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-[#003366] text-sm md:text-base">Hasil Tes Terakhir</h3>
-                <span class="text-[10px] font-bold text-gray-800">12 Okt 2023</span>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                <div class="w-14 h-14 rounded-full bg-[#e0f2fe] text-[#00558f] flex items-center justify-center text-2xl shrink-0 hidden sm:flex">
-                    <i class="fa-solid fa-head-side-gear"></i>
-                </div>
-                <div class="flex-grow w-full">
-                    <p class="text-[11px] text-gray-500 mb-2 font-medium">Kecenderungan Minat Dominan:</p>
-                    <div class="flex gap-2">
-                        <div class="bg-[#003366] text-white rounded-lg px-2 py-2 flex-1 flex flex-col justify-center items-center shadow-sm">
-                            <span class="text-[9px] md:text-[10px] font-medium tracking-wide mb-0.5">Realistic</span>
-                            <span class="text-sm md:text-base font-bold">85%</span>
-                        </div>
-                        <div class="bg-[#71faca] text-[#0f766e] rounded-lg px-2 py-2 flex-1 flex flex-col justify-center items-center shadow-sm">
-                            <span class="text-[9px] md:text-[10px] font-medium tracking-wide mb-0.5">Investigative</span>
-                            <span class="text-sm md:text-base font-bold">72%</span>
-                        </div>
-                        <div class="bg-[#92400e] text-white rounded-lg px-2 py-2 flex-1 flex flex-col justify-center items-center shadow-sm">
-                            <span class="text-[9px] md:text-[10px] font-medium tracking-wide mb-0.5">Artistic</span>
-                            <span class="text-sm md:text-base font-bold">64%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="font-bold text-[#003366] text-sm mb-3 pl-1">Aktivitas Saya</h3>
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm mb-6 flex flex-col overflow-hidden">
-            <a href="#" class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-[#ccfbf1] text-[#0f766e] flex items-center justify-center text-lg">
-                        <i class="fa-regular fa-bookmark"></i>
-                    </div>
+        {{-- Pengaturan akun --}}
+        <div class="bg-white border {{ $accentBorder }} rounded-2xl shadow-sm flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between p-4 border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <i class="fa-brands fa-google text-gray-400 w-6 text-center text-lg"></i>
                     <div>
-                        <h4 class="font-bold text-gray-800 text-sm">Sekolah Disimpan</h4>
-                        <p class="text-xs text-gray-500">12 Sekolah Menengah</p>
+                        <span class="font-medium text-gray-800 text-sm block">Login pakai Akun Google</span>
+                        <span class="text-[10px] text-gray-400">Tidak ada password terpisah untuk diubah</span>
                     </div>
                 </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
-            </a>
-            <a href="#" class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-full bg-[#e0f2fe] text-[#0284c7] flex items-center justify-center text-lg">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-full flex items-center justify-between p-4 hover:bg-red-50 transition-colors text-left">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-red-500 w-6 text-center text-lg"></i>
+                        <span class="font-bold text-red-500 text-sm">Keluar</span>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-gray-800 text-sm">Riwayat Tes</h4>
-                        <p class="text-xs text-gray-500">3 Tes Terselesaikan</p>
-                    </div>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
-            </a>
-        </div>
-
-        <h3 class="font-bold text-[#003366] text-sm mb-3 pl-1">Pengaturan Akun</h3>
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm flex flex-col overflow-hidden mb-6">
-            <a href="#" class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-gray-400 w-6 text-center text-lg"></i>
-                    <span class="font-medium text-gray-800 text-sm">Keamanan</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
-            </a>
-            <a href="#" class="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors border-b border-gray-100">
-                <div class="flex items-center gap-3">
-                    <i class="fa-regular fa-circle-question text-gray-400 w-6 text-center text-lg"></i>
-                    <span class="font-medium text-gray-800 text-sm">Pusat Bantuan</span>
-                </div>
-                <i class="fa-solid fa-chevron-right text-gray-400 text-sm"></i>
-            </a>
-            <a href="#" class="flex items-center justify-between p-4 hover:bg-red-50 transition-colors">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-red-500 w-6 text-center text-lg"></i>
-                    <span class="font-bold text-red-500 text-sm">Keluar</span>
-                </div>
-            </a>
+                </button>
+            </form>
         </div>
 
     </main>
 
-    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-center gap-16 md:gap-32 items-center pt-2 pb-4 px-6 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
-        <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-gray-600 transition-colors mt-2 md:mt-0">
-            <i class="fa-solid fa-house text-xl md:text-2xl mb-1"></i>
-            <span class="text-[10px] md:text-xs font-medium">Beranda</span>
+    <div class="fixed bottom-0 w-full bg-white border-t border-gray-200 flex justify-around items-center py-3 px-2 z-50 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
+        <a href="{{ route('dashboard') }}" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[10px] font-medium">Dashboard</span>
         </a>
-        
-        <a href="{{ route('assessment.index') }}" class="flex flex-col items-center justify-center w-16 text-gray-400 hover:text-gray-600 transition-colors mt-2 md:mt-0">
-            <i class="fa-regular fa-clipboard text-xl md:text-2xl mb-1"></i>
-            <span class="text-[10px] md:text-xs font-medium">Tes</span>
+        <a href="{{ route('assessment.index') }}" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-regular fa-clipboard text-lg"></i>
+            <span class="text-[10px] font-medium">Assessment</span>
         </a>
-        
-        <a href="#" class="flex flex-col items-center justify-center w-16 text-[#0f766e]">
-            <div class="bg-[#ccfbf1] w-14 h-14 md:w-16 md:h-16 rounded-full flex flex-col items-center justify-center -mt-6 md:-mt-8 shadow-sm border border-[#a7f3d0]">
-                <i class="fa-regular fa-user text-xl md:text-2xl"></i>
-            </div>
-            <span class="text-[10px] md:text-xs font-bold mt-1">Profil</span>
+        <a href="{{ route('eksplorasi.index') }}" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-compass text-lg"></i>
+            <span class="text-[10px] font-medium">Eksplorasi</span>
+        </a>
+        <a href="{{ route('rekomendasi.index') }}" class="flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fa-solid fa-bullseye text-lg"></i>
+            <span class="text-[10px] font-medium">Rekomendasi</span>
+        </a>
+        <a href="{{ route('profil') }}" class="flex flex-col items-center justify-center gap-1 {{ $accentText }}">
+            <i class="fa-regular fa-user text-lg"></i>
+            <span class="text-[10px] font-bold">Profil</span>
         </a>
     </div>
 

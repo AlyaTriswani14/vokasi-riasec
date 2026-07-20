@@ -1,81 +1,105 @@
 <!DOCTYPE html>
-<html class="light" lang="id">
+<html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>System Settings - Admin Pusat</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: { extend: { colors: { "primary": "#003e6f", "secondary-container": "#7ef7e5", "on-secondary-container": "#007166", "surface-container-low": "#f2f4f6", "outline-variant": "#c1c7d2", "on-surface": "#191c1e", "on-surface-variant": "#414750" } } }
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengaturan - Bakat Minat</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="flex overflow-hidden h-screen bg-[#f7f9fb]">
+<body class="bg-[#f8fafc] font-sans text-gray-800 min-h-screen">
 
-<aside class="h-screen w-64 fixed left-0 top-0 bg-surface-container-low flex flex-col p-4 gap-2 border-r border-outline-variant z-50">
-    <div class="flex items-center gap-3 px-2 mb-8">
-        <span class="material-symbols-outlined text-primary text-3xl">admin_panel_settings</span>
-        <div class="flex flex-col">
-            <span class="font-bold text-primary leading-tight text-sm">Admin Central</span>
-            <span class="text-[10px] text-on-surface-variant uppercase tracking-wider font-bold">Kemendikdasmen</span>
+    <div class="w-full flex justify-between items-center p-4 md:px-8 bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-2 text-[#003366] font-bold text-lg">
+            <i class="fa-solid fa-graduation-cap"></i> <span>Bakat Minat</span>
         </div>
-    </div>
-    <nav class="flex-1 space-y-1">
-        <a class="text-on-surface-variant hover:bg-outline-variant/30 rounded-lg flex items-center px-4 py-3 transition text-xs font-bold" href="{{ route('kemendikdasmen.dashboard') }}"><span class="material-symbols-outlined mr-3">dashboard</span>Dashboard</a>
-        <a class="text-on-surface-variant hover:bg-outline-variant/30 rounded-lg flex items-center px-4 py-3 transition text-xs font-bold" href="{{ route('kemendikdasmen.users') }}"><span class="material-symbols-outlined mr-3">group</span>User Management</a>
-        <a class="text-on-surface-variant hover:bg-outline-variant/30 rounded-lg flex items-center px-4 py-3 transition text-xs font-bold" 
-   href="{{ route('kemendikdasmen.questions') }}">
-    <span class="material-symbols-outlined mr-3">quiz</span>Manajemen Soal
-</a>
-        <a class="bg-secondary-container text-on-secondary-container font-bold rounded-lg flex items-center px-4 py-3 transition text-xs" href="{{ route('kemendikdasmen.settings') }}"><span class="material-symbols-outlined mr-3">settings</span>System Settings</a>
-        <a class="text-on-surface-variant hover:bg-outline-variant/30 rounded-lg flex items-center px-4 py-3 transition text-xs font-bold" href="{{ route('kemendikdasmen.broadcast') }}"><span class="material-symbols-outlined mr-3">campaign</span>Broadcast Center</a>
-    </nav>
-    <div class="pt-4 border-t border-outline-variant">
-        <form action="{{ route('kemendikdasmen.logout') }}" method="POST">@csrf
-            <button type="submit" class="w-full text-red-600 hover:bg-red-50 rounded-lg flex items-center px-4 py-3 transition font-bold text-xs"><span class="material-symbols-outlined mr-3">logout</span>Keluar</button>
-        </form>
-    </div>
-</aside>
-
-<main class="flex-1 pl-64 h-screen overflow-y-auto">
-    <div class="p-8 space-y-6 max-w-[900px] mx-auto">
-        <div>
-            <h1 class="text-2xl font-bold text-primary">System Configuration</h1>
-            <p class="text-xs text-on-surface-variant uppercase font-bold tracking-wider">Konfigurasi Target Kuota & Konstanta Aplikasi Nasional</p>
-        </div>
-
-        <section class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-xs font-bold text-on-surface mb-2 uppercase">Target Kuota SMK Nasional</label>
-                    <input type="number" class="w-full rounded-xl border-outline-variant text-sm px-4 py-2.5" value="{{ $settings['target_kuota_nasional'] }}">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface mb-2 uppercase">Tahun Ajaran Aktif</label>
-                    <input type="text" class="w-full rounded-xl border-outline-variant text-sm px-4 py-2.5" value="{{ $settings['tahun_ajaran'] }}">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface mb-2 uppercase">Alokasi Waktu Kuesioner (Menit)</label>
-                    <input type="number" class="w-full rounded-xl border-outline-variant text-sm px-4 py-2.5" value="{{ $settings['durasi_tes_menit'] }}">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-on-surface mb-2 uppercase">Status Sistem Operasional</label>
-                    <select class="w-full rounded-xl border-outline-variant text-sm px-4 py-2.5">
-                        <option selected>Normal / Active</option>
-                        <option>Maintenance Mode</option>
-                    </select>
-                </div>
+        <div class="flex items-center gap-4">
+            <div class="text-right hidden sm:block">
+                <p class="text-xs font-bold text-gray-700">{{ Auth::user()->name }}</p>
+                <p class="text-[10px] text-gray-400">Admin Direktorat SMK</p>
             </div>
-            
-            <div class="pt-4 border-t border-outline-variant flex justify-end">
-                <button class="px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow hover:bg-opacity-90 transition">
-                    Simpan Perubahan Parameter
+            <form action="{{ route('kemendikdasmen.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="w-9 h-9 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-sm"></i>
                 </button>
-            </div>
-        </section>
+            </form>
+        </div>
     </div>
-</main>
+
+    <div class="w-full bg-[#003366] overflow-x-auto">
+        <div class="max-w-6xl mx-auto flex gap-1 px-4">
+            <a href="{{ route('kemendikdasmen.dashboard') }}" class="text-white/60 hover:text-white text-xs font-bold px-4 py-3 border-b-2 border-transparent whitespace-nowrap transition-colors">Dashboard</a>
+            <a href="{{ route('kemendikdasmen.users') }}" class="text-white/60 hover:text-white text-xs font-bold px-4 py-3 border-b-2 border-transparent whitespace-nowrap transition-colors">Manajemen Sekolah</a>
+            <a href="{{ route('kemendikdasmen.questions') }}" class="text-white/60 hover:text-white text-xs font-bold px-4 py-3 border-b-2 border-transparent whitespace-nowrap transition-colors">Bank Soal</a>
+            <a href="{{ route('kemendikdasmen.settings') }}" class="text-white text-xs font-bold px-4 py-3 border-b-2 border-white whitespace-nowrap">Pengaturan</a>
+            <a href="{{ route('kemendikdasmen.broadcast') }}" class="text-white/60 hover:text-white text-xs font-bold px-4 py-3 border-b-2 border-transparent whitespace-nowrap transition-colors">Broadcast</a>
+        </div>
+    </div>
+
+    <main class="w-full max-w-3xl mx-auto px-4 py-8 flex flex-col gap-6">
+
+        <div>
+            <span class="inline-block bg-[#003366] text-white text-[10px] font-bold px-3 py-1.5 rounded-full mb-2">ADMIN DIREKTORAT SMK</span>
+            <h1 class="text-xl font-extrabold text-gray-800">Pengaturan Sistem</h1>
+            <p class="text-sm text-gray-500">Konfigurasi umum platform Bakat Minat.</p>
+        </div>
+
+        @if(session('success'))
+            <div class="bg-green-50 border border-green-100 text-green-700 text-xs rounded-xl p-3">{{ session('success') }}</div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-50 border border-red-100 text-red-600 text-xs rounded-xl p-3">
+                <ul class="list-disc list-inside">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form method="POST" action="{{ route('kemendikdasmen.settings.update') }}" class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 flex flex-col gap-5">
+            @csrf
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                    <i class="fa-solid fa-clock text-[#2F6FED] mr-1"></i> Durasi Tes (menit)
+                </label>
+                <input type="number" name="durasi_tes_menit" min="1" max="180" value="{{ old('durasi_tes_menit', $settings['durasi_tes_menit']) }}" required class="w-full max-w-xs border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20">
+                <p class="text-[10px] text-gray-400 mt-1">Perubahan langsung berlaku untuk siswa yang memulai tes setelah ini disimpan.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                    <i class="fa-solid fa-bullseye text-[#c2410c] mr-1"></i> Target Kuota Nasional (siswa)
+                </label>
+                <input type="number" name="target_kuota_nasional" min="0" value="{{ old('target_kuota_nasional', $settings['target_kuota_nasional']) }}" required class="w-full max-w-xs border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                    <i class="fa-solid fa-calendar-days text-[#0f766e] mr-1"></i> Tahun Ajaran
+                </label>
+                <input type="text" name="tahun_ajaran" value="{{ old('tahun_ajaran', $settings['tahun_ajaran']) }}" required placeholder="2026/2027" class="w-full max-w-xs border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1.5">
+                    <i class="fa-solid fa-server text-green-600 mr-1"></i> Status Sistem
+                </label>
+                <select name="status_sistem" required class="w-full max-w-xs border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#003366]/20">
+                    <option value="Aktif" {{ old('status_sistem', $settings['status_sistem']) === 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Maintenance" {{ old('status_sistem', $settings['status_sistem']) === 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
+                </select>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="bg-[#003366] text-white text-xs font-bold px-6 py-2.5 rounded-xl hover:bg-[#002855] transition-colors">Simpan Pengaturan</button>
+            </div>
+        </form>
+
+    </main>
+
 </body>
 </html>

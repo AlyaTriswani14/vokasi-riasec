@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; // Menggunakan model User tunggal yang kamu miliki
+use App\Models\User;
+use App\Models\RiasecResult;
 
 class KemendikdasmenAuthController extends Controller
 {
@@ -35,11 +36,11 @@ class KemendikdasmenAuthController extends Controller
 
         // Coba autentikasi menggunakan email dan password
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            
+
             // PROTEKSI EKSTRA: Cek apakah user yang login benar-benar role kemendikdasmen
             if (Auth::user()->role === 'kemendikdasmen') {
                 $request->session()->regenerate();
-                
+
                 // Jika benar, arahkan ke dashboard admin pusat
                 return redirect()->intended(route('kemendikdasmen.dashboard'));
             }
@@ -66,51 +67,68 @@ class KemendikdasmenAuthController extends Controller
     public function dashboard()
     {
         // ==========================================
-        // 1. STRATEGI DATA SEMI-DINAMIS (TABEL USERS)
+        // DATA ASLI DARI DATABASE (bukan data contoh lagi)
         // ==========================================
-        
-        // Menghitung jumlah siswa SMP & SMK berdasarkan kriteria kolom di tabel users kamu
-        // (Silakan sesuaikan value 'siswa'/'siswa_smk' atau 'SMP'/'SMK' dengan isi database asli kamu nanti)
-        $statSiswaSmpTerdaftar = User::where('role', 'siswa')->whereNotNull('nisn')->count();
-        $statSiswaSmkTerdaftar = User::where('role', 'siswa_smk')->count();
-        
-        // Menghitung jumlah sekolah unik yang terdeteksi dari isian data siswa
-        $statSekolahTerdaftar = User::whereNotNull('asal_sekolah')->distinct('asal_sekolah')->count();
 
-        // FALLBACK BACKUP: Jika database masih kosong/0 (baru di-migrate fresh), 
-        // kita isi angka tiruan agar presentasi/demo awal kamu tetap terlihat bagus dan terisi.
-        if ($statSiswaSmpTerdaftar === 0) {
-            $statSiswaSmpTerdaftar = 128430;
-        }
-        if ($statSiswaSmkTerdaftar === 0) {
-            $statSiswaSmkTerdaftar = 496472;
-        }
-        if ($statSekolahTerdaftar === 0) {
-            $statSekolahTerdaftar = 18420;
-        }
-        
-        // Menghitung persentase pendaftaran SMK berdasarkan target kuota nasional (target 600.000)
-        $targetKuotaSmk = 600000;
-        $persentaseSmk = round(($statSiswaSmkTerdaftar / $targetKuotaSmk) * 100, 1);
+        $totalSiswaSmp = User::where('role', 'siswa')->where('jenjang', 'smp')->count();
+        $totalSiswaSmk = User::where('role', 'siswa')->where('jenjang', 'smk')->count();
 
-        // ==========================================
-        // 2. DATA REGIONAL LEADERBOARD (UNTUK BLADE)
-        // ==========================================
-        $leaderboardWilayah = [
-            ['provinsi' => 'DKI Jakarta', 'sekolah' => '1.240', 'siswa' => '85.420', 'completion' => '96.2%'],
-            ['provinsi' => 'Jawa Barat', 'sekolah' => '4.850', 'siswa' => '142.110', 'completion' => '94.8%'],
-            ['provinsi' => 'Jawa Timur', 'sekolah' => '3.920', 'siswa' => '118.450', 'completion' => '91.5%'],
-            ['provinsi' => 'Sumatera Utara', 'sekolah' => '1.810', 'siswa' => '54.230', 'completion' => '89.1%'],
-            ['provinsi' => 'Sulawesi Selatan', 'sekolah' => '980', 'siswa' => '28.640', 'completion' => '87.4%'],
-        ];
+        $totalSekolahSmp = User::where('role', 'guru_bk')->where('jenjang', 'smp')->count();
+        $totalSekolahSmk = User::where('role', 'guru_bk')->where('jenjang', 'smk')->count();
 
-        // Mengirimkan seluruh variabel pelengkap dengan aman menuju file view dashboard-admin.blade.php
+        $siswaSmpIds = User::where('role', 'siswa')->where('jenjang', 'smp')->pluck('id');
+        $siswaSmkIds = User::where('role', 'siswa')->where('jenjang', 'smk')->pluck('id');
+
+        $totalTesSmp = RiasecResult::whereIn('user_id', $siswaSmpIds)->distinct('user_id')->count('user_id');
+        $totalTesSmk = RiasecResult::whereIn('user_id', $siswaSmkIds)->distinct('user_id')->count('user_id');
+
+        // Top 5 sekolah berdasarkan jumlah siswa terdaftar (dihitung dari akun Guru BK
+        // yang sudah terdaftar via NPSN, dicocokkan ke asal_sekolah siswa)
+        $topSekolah = User::where('role', 'guru_bk')->get()->map(function ($guru) {
+            $jumlahSiswa = User::where('role', 'siswa')
+                ->where('asal_sekolah', $guru->nama_sekolah)
+                ->count();
+
+            return [
+                'nama' => $guru->nama_sekolah,
+                'npsn' => $guru->npsn,
+                'jumlah_siswa' => $jumlahSiswa,
+            ];
+        })->sortByDesc('jumlah_siswa')->take(5)->values();
+
+        // Tren jumlah tes selesai per bulan, dipisah SMP & SMK
+        $jenjangMap = User::pluck('jenjang', 'id');
+        $hasilAll = RiasecResult::select('user_id', 'created_at')->orderBy('created_at')->get();
+
+        $trendSmp = [];
+        $trendSmk = [];
+        foreach ($hasilAll as $r) {
+            $bulan = $r->created_at->format('Y-m');
+            $jenjangSiswa = $jenjangMap[$r->user_id] ?? null;
+            if ($jenjangSiswa === 'smp') {
+                $trendSmp[$bulan] = ($trendSmp[$bulan] ?? 0) + 1;
+            } elseif ($jenjangSiswa === 'smk') {
+                $trendSmk[$bulan] = ($trendSmk[$bulan] ?? 0) + 1;
+            }
+        }
+
+        $allBulan = collect(array_keys($trendSmp))->merge(array_keys($trendSmk))->unique()->sort()->values();
+
+        $trendLabels = $allBulan->map(fn ($b) => \Carbon\Carbon::createFromFormat('Y-m', $b)->translatedFormat('M Y'))->toArray();
+        $trendDataSmp = $allBulan->map(fn ($b) => $trendSmp[$b] ?? 0)->toArray();
+        $trendDataSmk = $allBulan->map(fn ($b) => $trendSmk[$b] ?? 0)->toArray();
+
         return view('Kemendikdasmen.dashboard-admin', compact(
-            'statSekolahTerdaftar',
-            'statSiswaSmpTerdaftar', 
-            'statSiswaSmkTerdaftar',
-            'persentaseSmk',
-            'leaderboardWilayah'
+            'totalSiswaSmp',
+            'totalSiswaSmk',
+            'totalSekolahSmp',
+            'totalSekolahSmk',
+            'totalTesSmp',
+            'totalTesSmk',
+            'topSekolah',
+            'trendLabels',
+            'trendDataSmp',
+            'trendDataSmk'
         ));
     }
 

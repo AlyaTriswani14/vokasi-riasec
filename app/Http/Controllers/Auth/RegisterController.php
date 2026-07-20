@@ -7,29 +7,23 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 class RegisterController extends Controller
 {
-    /**
-     * Tampilkan halaman form registrasi (tampilan awal)
-     */
     public function showRegistrationForm()
     {
-        // Jika sudah login, langsung ke halaman assessment
         if (Auth::check()) {
             return redirect()->route('assessment.index');
         }
         return view('auth.register');
     }
-    /**
-     * Proses pendaftaran user baru
-     */
+
     public function register(Request $request)
     {
-        // Validasi data input
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'nisn' => 'required|string|size:10|unique:users,nisn',
             'asal_sekolah' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
+            'jenjang' => 'nullable|in:smp,smk',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'name.max' => 'Nama lengkap maksimal 255 karakter.',
@@ -45,21 +39,23 @@ class RegisterController extends Controller
             'password.min' => 'Kata sandi minimal berisi 8 karakter.',
             'password.confirmed' => 'Ulangi kata sandi tidak cocok.',
         ]);
-        // Simpan ke database
+
+        $jenjang = $validated['jenjang'] ?? session('jenjang', 'smp');
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'nisn' => $validated['nisn'],
             'asal_sekolah' => $validated['asal_sekolah'],
+            'jenjang' => $jenjang,
         ]);
-        // Login otomatis
+
         Auth::login($user);
-        // Set session assessment agar bisa langsung memulai tes
         $request->session()->put('assessment', [
             'nama' => $user->name,
             'sekolah' => $user->asal_sekolah,
-            'kelas' => '10' // default kelas X, bisa diganti atau dilanjutkan
+            'kelas' => '10'
         ]);
         return redirect()->route('assessment.questions')
             ->with('success', 'Akun berhasil dibuat! Silakan mulai petualanganmu.');

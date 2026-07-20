@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\RiasecResult; // Pastikan Model ini ada
+use App\Models\SoalRiasec;   // Bank soal dari database
+use App\Models\Pengaturan;   // Pengaturan sistem (durasi tes, dll)
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentController extends Controller
 {
@@ -11,125 +15,117 @@ class AssessmentController extends Controller
      */
     public function index()
     {
-        return view('assessment.index');
+        // Cek apakah user sudah login
+        if (!auth()->check()) {
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
+        }
+
+        // Dulu: kalau sudah punya hasil tes, langsung redirect ke dashboard.
+        // Sekarang Assessment adalah tab tetap di bottom nav, jadi halaman ini
+        // harus tetap bisa dibuka kapan saja — cukup kasih tahu status "sudah tes"
+        // ke view supaya tombolnya berubah jadi "Ulangi Tes".
+        $sudahTes = RiasecResult::where('user_id', auth()->id())->exists();
+
+        return view('assessment.index', compact('sudahTes'));
     }
 
     /**
-     * Mulai assessment (Tanpa validasi nama/kelas karena pakai tombol langsung)
+     * Mulai assessment
      */
     public function start(Request $request)
     {
-        // Karena data diri (nama, dll) didapat dari proses Login/Register sebelumnya,
-        // di sini kita cukup memberikan tanda (session) bahwa user sudah memulai tes.
         $request->session()->put('assessment_started', true);
-
-        // Langsung arahkan ke halaman pertanyaan
         return redirect()->route('assessment.questions');
     }
 
     /**
-     * Tampilkan pertanyaan assessment
+     * Tampilkan pertanyaan assessment.
+     * Soal sekarang diambil dari tabel soal_riasecs (status = aktif),
+     * bukan lagi array hardcoded di dalam view.
      */
     public function questions()
     {
-        // Pastikan user masuk dari tombol "Mulai Tes", bukan langsung mengetik URL
         if (!session('assessment_started')) {
             return redirect()->route('assessment.index')
-                             ->with('error', 'Silakan klik Mulai Tes terlebih dahulu');
+                            ->with('error', 'Silakan klik Mulai Tes terlebih dahulu');
         }
 
-        return view('assessment.questions');
+        $soalList = SoalRiasec::where('status', 'aktif')
+            ->orderBy('urutan')
+            ->get();
+
+        // Jaga-jaga kalau admin menonaktifkan/menghapus semua soal
+        if ($soalList->isEmpty()) {
+            return redirect()->route('assessment.index')
+                            ->with('error', 'Soal tes belum tersedia. Hubungi admin.');
+        }
+
+        // Durasi tes (menit) diambil dari pengaturan sistem yang bisa diubah admin
+        $durasiMenit = (int) Pengaturan::get('durasi_tes_menit', 5);
+
+        return view('assessment.questions-siswa', compact('soalList', 'durasiMenit'));
     }
 
     /**
-     * Proses hasil assessment (Menghitung Skor RIASEC)
+     * Proses hasil assessment dan simpan ke database.
+     * Skor dihitung berdasarkan aspek tiap soal yang tersimpan di database
+     * (bukan lagi kunci jawaban hardcoded berbasis nomor soal).
      */
     public function submit(Request $request)
     {
-        // Ambil data jawaban (berupa array berisi nomor soal yang dicentang)
-        // Jika tidak ada yang dicentang sama sekali, defaultnya adalah array kosong []
-        $jawaban = $request->input('jawaban', []); 
+        // $jawaban berisi daftar ID soal yang dijawab "YA"
+        $jawaban = $request->input('jawaban', []);
 
-        // 1. Kunci Jawaban RIASEC berdasarkan dokumen PDF 
-        $kunci = [
-            'R' => [1, 7, 14, 22, 30, 32, 37], // R - Realistic 
-            'I' => [2, 11, 18, 21, 26, 33, 39], // I - Investigative 
-            'A' => [3, 8, 17, 23, 27, 31, 41], // A - Artistic 
-            'S' => [4, 12, 13, 20, 28, 34, 40], // S - Social 
-            'E' => [5, 10, 16, 19, 29, 36, 42], // E - Enterprising 
-            'C' => [6, 9, 15, 24, 25, 35, 38], // C - Conventional 
-        ];
-
-        // Siapkan wadah skor awal (0 semua)
         $skor = ['R' => 0, 'I' => 0, 'A' => 0, 'S' => 0, 'E' => 0, 'C' => 0];
 
-        // 2. Hitung jumlah skor berdasarkan jawaban "Ya" (yang dicentang)
-        foreach ($jawaban as $nomor_soal) {
-            foreach ($kunci as $tipe => $daftar_nomor) {
-                if (in_array($nomor_soal, $daftar_nomor)) {
-                    $skor[$tipe]++;
-                    break; // Lanjut ke nomor soal berikutnya
-                }
+        // Ambil aspek tiap soal yang dijawab YA langsung dari database
+        $aspekMap = SoalRiasec::whereIn('id', $jawaban)->pluck('aspek', 'id');
+
+        foreach ($jawaban as $idSoal) {
+            $aspek = $aspekMap[$idSoal] ?? null;
+            if ($aspek && isset($skor[$aspek])) {
+                $skor[$aspek]++;
             }
         }
 
-        // 3. Urutkan skor dari yang paling tinggi ke paling rendah
-        arsort($skor);
+        // SIMPAN KE DATABASE
+        RiasecResult::create([
+            'user_id' => Auth::id(),
+            'skor_r'  => $skor['R'],
+            'skor_i'  => $skor['I'],
+            'skor_a'  => $skor['A'],
+            'skor_s'  => $skor['S'],
+            'skor_e'  => $skor['E'],
+            'skor_c'  => $skor['C'],
+        ]);
 
-        // 4. Ambil 3 Minat Tertinggi (Top 3)
+        // Urutkan untuk session result (tampilan)
+        arsort($skor);
         $top3 = array_slice($skor, 0, 3, true);
 
-        // Simpan hasil skor ini ke dalam session agar bisa ditampilkan di halaman Result dan Scoring
         $request->session()->put('assessment_result', [
             'skor_lengkap' => $skor,
             'top3' => $top3
         ]);
 
-        // Arahkan ke halaman hasil utama
         return redirect()->route('assessment.result')
-                         ->with('success', 'Tes selesai! Ini adalah hasilnya.');
+                         ->with('success', 'Tes selesai! Hasil telah disimpan.');
     }
 
-    /**
-     * Tampilkan hasil assessment utama
-     */
     public function result()
     {
-        // Jika belum ada hasil, kembalikan ke halaman index
         if (!session('assessment_result')) {
             return redirect()->route('assessment.index');
         }
 
-        // Tampilkan halaman view result dengan membawa data hasil
         return view('assessment.result', [
             'hasil' => session('assessment_result')
         ]);
     }
 
-    /**
-     * Tampilkan detail skoring assessment
-     */
-    public function scoring()
-    {
-        // Jika belum ada hasil, kembalikan ke halaman index
-        if (!session('assessment_result')) {
-            return redirect()->route('assessment.index');
-        }
-
-        // Tampilkan halaman view scoring dengan membawa data hasil yang sama
-        return view('assessment.scoring', [
-            'hasil' => session('assessment_result')
-        ]);
-    }
-
-    /**
-     * Reset assessment
-     */
     public function reset(Request $request)
     {
-        // Hapus semua data tes dari memori session
         $request->session()->forget(['assessment_started', 'assessment_result']);
-        
         return redirect()->route('assessment.index');
     }
 }
