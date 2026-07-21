@@ -37,10 +37,10 @@ export default async function RekomendasiPage() {
   const sekolahTerdekat = !theme.isSmk && hasilTes ? await getSekolahTerdekat(user) : [];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
       <TopHeader name={user.name} />
 
-      <main className="flex flex-col gap-5 px-4 pt-6 pb-12">
+      <main className="flex flex-col gap-5 max-w-4xl mx-auto px-4 pt-6 pb-12">
         <div className="rounded-3xl p-6 shadow-lg relative overflow-hidden text-white" style={theme.gradientStyle}>
           <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />
           <div className="relative z-10">

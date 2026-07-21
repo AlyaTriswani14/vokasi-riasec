@@ -40,10 +40,10 @@ export default async function AssessmentResultPage() {
   const namaDepan = user.name.split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
       <TopHeader name={user.name} />
 
-      <main className="flex flex-col gap-5 px-4 pt-6 pb-12">
+      <main className="flex flex-col gap-5 max-w-3xl mx-auto px-4 pt-6 pb-12">
         {/* Hero selamat */}
         <div className="rounded-3xl p-6 shadow-lg relative overflow-hidden text-white text-center" style={theme.gradientStyle}>
           <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />

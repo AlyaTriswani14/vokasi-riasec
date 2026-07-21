@@ -23,10 +23,10 @@ export default async function AssessmentGuidePage() {
   const durasiMenit = parseInt(durasiSetting?.nilai || "5", 10);
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+    <div className="min-h-screen bg-[#f8fafc] pb-24 relative">
       <TopHeader name={user.name} />
 
-      <main className="px-4 pt-6 pb-12">
+      <main className="max-w-4xl mx-auto px-4 pt-6 pb-12">
         <div className={`bg-white p-8 rounded-3xl shadow-lg border ${theme.accentBorder} text-center relative overflow-hidden`}>
           <div className="absolute w-28 h-28 rounded-full -top-10 -right-10 opacity-10" style={theme.gradientStyle} />
           <div className="relative z-10">
