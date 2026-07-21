@@ -24,6 +24,10 @@ class RegisterController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'jenjang' => 'nullable|in:smp,smk',
+            'provinsi' => 'required|string|max:255',
+            'kabupaten_kota' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
+            'kelurahan' => 'required|string|max:255',
         ], [
             'name.required' => 'Nama lengkap wajib diisi.',
             'name.max' => 'Nama lengkap maksimal 255 karakter.',
@@ -38,6 +42,10 @@ class RegisterController extends Controller
             'password.required' => 'Kata sandi wajib diisi.',
             'password.min' => 'Kata sandi minimal berisi 8 karakter.',
             'password.confirmed' => 'Ulangi kata sandi tidak cocok.',
+            'provinsi.required' => 'Provinsi domisili wajib dipilih.',
+            'kabupaten_kota.required' => 'Kabupaten/kota domisili wajib dipilih.',
+            'kecamatan.required' => 'Kecamatan domisili wajib dipilih.',
+            'kelurahan.required' => 'Kelurahan/desa domisili wajib dipilih.',
         ]);
 
         $jenjang = $validated['jenjang'] ?? session('jenjang', 'smp');
@@ -49,6 +57,10 @@ class RegisterController extends Controller
             'nisn' => $validated['nisn'],
             'asal_sekolah' => $validated['asal_sekolah'],
             'jenjang' => $jenjang,
+            'provinsi' => $validated['provinsi'],
+            'kabupaten_kota' => $validated['kabupaten_kota'],
+            'kecamatan' => $validated['kecamatan'],
+            'kelurahan' => $validated['kelurahan'],
         ]);
 
         Auth::login($user);

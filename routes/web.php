@@ -12,6 +12,7 @@ use App\Http\Controllers\Kemendikdasmen\KemendikdasmenManagementController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuruBkAuthController;
 use App\Http\Controllers\GuruBkController;
+use App\Http\Controllers\WilayahController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,12 +35,19 @@ Route::get('/mulai', function () {
 Route::get('/pilih-jenjang/{jenjang}', function (string $jenjang) {
     abort_unless(in_array($jenjang, ['smp', 'smk']), 404);
     session(['jenjang' => $jenjang]);
-    return redirect()->route('login');
+    return redirect()->route('login')->withCookie(cookie('jenjang', $jenjang, 30));
 })->name('jenjang.pilih');
 
 // ==========================================
 // KELOMPOK RUTE SISWA (SMP & SMK) & GURU
 // ==========================================
+
+Route::prefix('api/wilayah')->name('wilayah.')->group(function () {
+    Route::get('/provinsi', [WilayahController::class, 'provinsi'])->name('provinsi');
+    Route::get('/kabupaten-kota/{kodeProvinsi}', [WilayahController::class, 'kabupatenKota'])->name('kabupaten-kota');
+    Route::get('/kecamatan/{kodeKabupatenKota}', [WilayahController::class, 'kecamatan'])->name('kecamatan');
+    Route::get('/kelurahan/{kodeKecamatan}', [WilayahController::class, 'kelurahan'])->name('kelurahan');
+});
 
 Route::get('/register', function () {
     return view('auth.login');
@@ -60,6 +68,15 @@ Route::get('/auth/google/redirect', function () {
 Route::get('/auth/google/callback', function (\Illuminate\Http\Request $request) {
     $googleUser = Socialite::driver('google')->stateless()->user();
 
+    \Illuminate\Support\Facades\Log::info('DEBUG jenjang callback', [
+        'session_jenjang' => session('jenjang'),
+        'cookie_jenjang' => $request->cookie('jenjang'),
+        'all_cookies' => $request->cookies->all(),
+    ]);
+
+    $jenjang = session('jenjang', $request->cookie('jenjang', 'smp'));
+    abort_unless(in_array($jenjang, ['smp', 'smk']), 404);
+
     $user = User::where('email', $googleUser->getEmail())->first();
 
     if (!$user) {
@@ -67,9 +84,12 @@ Route::get('/auth/google/callback', function (\Illuminate\Http\Request $request)
             'name' => $googleUser->getName() ?: ($googleUser->getNickname() ?: 'Siswa'),
             'email' => $googleUser->getEmail(),
             'password' => Hash::make(Str::random(32)),
-            'jenjang' => session('jenjang', 'smp'),
+            'jenjang' => $jenjang,
             'role' => 'siswa',
         ]);
+    } elseif (empty($user->jenjang)) {
+        // Jaga-jaga untuk akun lama yang belum pernah punya jenjang tersimpan.
+        $user->update(['jenjang' => $jenjang]);
     }
 
     Auth::login($user);
@@ -95,6 +115,10 @@ Route::post('/lengkapi-profil', function (\Illuminate\Http\Request $request) {
         'nisn' => 'required|string|size:10|unique:users,nisn,' . Auth::id(),
         'asal_sekolah' => 'required|string|max:255',
         'kelas' => 'required|string',
+        'provinsi' => 'required|string|max:255',
+        'kabupaten_kota' => 'required|string|max:255',
+        'kecamatan' => 'required|string|max:255',
+        'kelurahan' => 'required|string|max:255',
     ], [
         'name.required' => 'Nama lengkap wajib diisi.',
         'nisn.required' => 'NISN wajib diisi.',
@@ -102,6 +126,10 @@ Route::post('/lengkapi-profil', function (\Illuminate\Http\Request $request) {
         'nisn.unique' => 'NISN sudah terdaftar oleh akun lain.',
         'asal_sekolah.required' => 'Asal sekolah wajib diisi.',
         'kelas.required' => 'Kelas wajib dipilih.',
+        'provinsi.required' => 'Provinsi domisili wajib dipilih.',
+        'kabupaten_kota.required' => 'Kabupaten/kota domisili wajib dipilih.',
+        'kecamatan.required' => 'Kecamatan domisili wajib dipilih.',
+        'kelurahan.required' => 'Kelurahan/desa domisili wajib dipilih.',
     ]);
 
     Auth::user()->update($validated);
@@ -128,7 +156,8 @@ Route::group([], function () {
     Route::get('/rekomendasi', function () {
         $user = \Illuminate\Support\Facades\Auth::user();
         $hasilTes = \App\Models\RiasecResult::where('user_id', $user->id)->latest()->first();
-        return view('siswa.rekomendasi', compact('hasilTes'));
+        $sekolahTerdekat = (new \App\Services\SekolahTerdekatService())->untukSiswa($user);
+        return view('siswa.rekomendasi', compact('hasilTes', 'user', 'sekolahTerdekat'));
     })->name('rekomendasi.index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -147,6 +176,10 @@ Route::group([], function () {
             'nisn' => 'required|size:10|unique:users,nisn,' . $user->id,
             'asal_sekolah' => 'required|string|max:255',
             'kelas' => 'required|string',
+            'provinsi' => 'required|string|max:255',
+            'kabupaten_kota' => 'required|string|max:255',
+            'kecamatan' => 'required|string|max:255',
+            'kelurahan' => 'required|string|max:255',
         ]);
 
         $user->update([
@@ -154,6 +187,10 @@ Route::group([], function () {
             'nisn' => $request->nisn,
             'asal_sekolah' => $request->asal_sekolah,
             'kelas' => $request->kelas,
+            'provinsi' => $request->provinsi,
+            'kabupaten_kota' => $request->kabupaten_kota,
+            'kecamatan' => $request->kecamatan,
+            'kelurahan' => $request->kelurahan,
         ]);
 
         return redirect()->route('profil')->with('success', 'Data diri berhasil diperbarui.');

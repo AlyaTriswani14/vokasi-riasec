@@ -23,6 +23,10 @@ class User extends Authenticatable
         'role',
         'nama_sekolah',
         'npsn',
+        'provinsi',
+        'kabupaten_kota',
+        'kecamatan',
+        'kelurahan',
     ];
 
     protected $hidden = [

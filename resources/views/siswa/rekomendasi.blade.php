@@ -23,23 +23,6 @@
             's' => 'Social', 'e' => 'Enterprising', 'c' => 'Conventional',
         ];
 
-        // Contoh data SMK terdekat (SMP) — nanti bisa dihubungkan ke database sekolah asli
-        $sekolahTerdekat = [
-            ['nama' => 'SMKN 1 Contoh Kota', 'jurusan' => 'Rekayasa Perangkat Lunak', 'jarak' => '~1.2 km'],
-            ['nama' => 'SMKN 2 Contoh Kota', 'jurusan' => 'Teknik Kendaraan Ringan', 'jarak' => '~2.5 km'],
-            ['nama' => 'SMK Swasta Harapan', 'jurusan' => 'Desain Komunikasi Visual', 'jarak' => '~3.1 km'],
-        ];
-
-        // Rekomendasi ekstrakurikuler per tipe dominan (SMP)
-        $rekomEkskul = [
-            'r' => ['Pramuka', 'PMR', 'Klub Otomotif'],
-            'i' => ['Karya Ilmiah Remaja (KIR)', 'Klub Robotik', 'Klub Sains'],
-            'a' => ['Seni Musik/Tari', 'Fotografi', 'Teater'],
-            's' => ['PMR', 'OSIS', 'Pramuka'],
-            'e' => ['OSIS', 'Debat', 'Kewirausahaan/Koperasi Siswa'],
-            'c' => ['Klub Akuntansi', 'Perpustakaan', 'Administrasi'],
-        ];
-
         // Prospek karier per tipe dominan (SMK)
         $prospekKarier = [
             'r' => [
@@ -98,7 +81,7 @@
                     @if($isSmk)
                         Prospek karier yang cocok berdasarkan tipe minatmu.
                     @else
-                        SMK terdekat dan ekstrakurikuler yang sesuai minatmu.
+                        SMK terdekat yang sesuai minatmu.
                     @endif
                 </p>
             </div>
@@ -141,40 +124,38 @@
                 <p class="text-[10px] text-gray-400 mt-3">*Kisaran gaji bersifat umum sebagai gambaran awal, bisa berbeda tergantung pengalaman, lokasi, dan perusahaan.</p>
             </div>
         @else
-            {{-- ===== SMP: SMK Terdekat + Ekskul ===== --}}
+            {{-- ===== SMP: SMK Terdekat ===== --}}
             <div>
                 <div class="flex items-center justify-between mb-3">
                     <h2 class="text-lg font-bold text-gray-800">SMK Terdekat</h2>
-                    <span class="text-[10px] text-gray-400 italic">Contoh data</span>
                 </div>
-                <div class="flex flex-col gap-3">
-                    @foreach($sekolahTerdekat as $s)
-                        <div class="bg-white border {{ $accentBorder }} rounded-2xl p-4 shadow-sm flex items-center gap-3">
-                            <div class="w-10 h-10 shrink-0 rounded-xl {{ $accentBg }} flex items-center justify-center {{ $accentText }}">
-                                <i class="fa-solid fa-school text-sm"></i>
-                            </div>
-                            <div class="flex-grow">
-                                <h3 class="font-bold text-gray-800 text-sm">{{ $s['nama'] }}</h3>
-                                <p class="text-xs text-gray-500">Unggulan: {{ $s['jurusan'] }}</p>
-                            </div>
-                            <span class="text-[10px] font-bold {{ $accentText }} shrink-0">{{ $s['jarak'] }}</span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
 
-            <div class="mt-2">
-                <h2 class="text-lg font-bold text-gray-800 mb-3">Rekomendasi Ekstrakurikuler</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    @foreach($rekomEkskul[$tipeDominan] as $item)
-                        <div class="bg-white border {{ $accentBorder }} rounded-2xl p-4 shadow-sm flex items-center gap-3">
-                            <div class="w-9 h-9 shrink-0 rounded-lg {{ $accentBg }} flex items-center justify-center {{ $accentText }}">
-                                <i class="fa-solid fa-star text-sm"></i>
+                @if(empty($user->provinsi) || empty($user->kabupaten_kota) || empty($user->kecamatan) || empty($user->kelurahan))
+                    <div class="bg-white border {{ $accentBorder }} rounded-2xl p-5 shadow-sm flex flex-col items-center text-center gap-2">
+                        <i class="fa-solid fa-location-dot text-xl {{ $accentText }}"></i>
+                        <p class="text-sm text-gray-600">Lengkapi data domisili di halaman <a href="{{ route('profil') }}" class="font-bold {{ $accentText }} underline">Profil</a> supaya kami bisa cari SMK terdekat dari tempat tinggalmu.</p>
+                    </div>
+                @elseif($sekolahTerdekat->isEmpty())
+                    <div class="bg-white border {{ $accentBorder }} rounded-2xl p-5 shadow-sm flex flex-col items-center text-center gap-2">
+                        <i class="fa-solid fa-school-circle-xmark text-xl {{ $accentText }}"></i>
+                        <p class="text-sm text-gray-600">Belum ada data SMK yang cocok dengan wilayahmu saat ini.</p>
+                    </div>
+                @else
+                    <div class="flex flex-col gap-3">
+                        @foreach($sekolahTerdekat as $item)
+                            <div class="bg-white border {{ $accentBorder }} rounded-2xl p-4 shadow-sm flex items-center gap-3">
+                                <div class="w-10 h-10 shrink-0 rounded-xl {{ $accentBg }} flex items-center justify-center {{ $accentText }}">
+                                    <i class="fa-solid fa-school text-sm"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <h3 class="font-bold text-gray-800 text-sm">{{ $item['sekolah']->nama_sekolah }}</h3>
+                                    <p class="text-xs text-gray-500">{{ $item['sekolah']->kecamatan }}, {{ $item['sekolah']->kabupaten_kota }}</p>
+                                </div>
+                                <span class="text-[10px] font-bold {{ $accentText }} {{ $accentBg }} px-2 py-1 rounded-full shrink-0">{{ $item['tingkat_kecocokan'] }}</span>
                             </div>
-                            <p class="text-xs font-bold text-gray-700">{{ $item }}</p>
-                        </div>
-                    @endforeach
-                </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         @endif
     </main>

@@ -219,6 +219,62 @@
                             </div>
                         </div>
 
+                        <!-- DOMISILI (untuk rekomendasi SMK terdekat) -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">Domisili Saat Ini</label>
+                            <p class="text-[10px] text-gray-400 italic mb-3">Dipakai untuk mencocokkan rekomendasi SMK terdekat dari tempat tinggalmu.</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <!-- PROVINSI -->
+                                <div class="space-y-1.5">
+                                    <label for="provinsi" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Provinsi</label>
+                                    <select id="provinsi" name="provinsi" required
+                                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm transition">
+                                        <option value="" disabled selected>Memuat provinsi...</option>
+                                    </select>
+                                    @error('provinsi')
+                                        <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- KABUPATEN/KOTA -->
+                                <div class="space-y-1.5">
+                                    <label for="kabupaten_kota" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Kabupaten/Kota</label>
+                                    <select id="kabupaten_kota" name="kabupaten_kota" required disabled
+                                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm transition disabled:bg-gray-100 disabled:text-gray-400">
+                                        <option value="" disabled selected>Pilih provinsi dulu</option>
+                                    </select>
+                                    @error('kabupaten_kota')
+                                        <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- KECAMATAN -->
+                                <div class="space-y-1.5">
+                                    <label for="kecamatan" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Kecamatan</label>
+                                    <select id="kecamatan" name="kecamatan" required disabled
+                                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm transition disabled:bg-gray-100 disabled:text-gray-400">
+                                        <option value="" disabled selected>Pilih kabupaten/kota dulu</option>
+                                    </select>
+                                    @error('kecamatan')
+                                        <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <!-- KELURAHAN/DESA -->
+                                <div class="space-y-1.5">
+                                    <label for="kelurahan" class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Kelurahan/Desa</label>
+                                    <select id="kelurahan" name="kelurahan" required disabled
+                                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm transition disabled:bg-gray-100 disabled:text-gray-400">
+                                        <option value="" disabled selected>Pilih kecamatan dulu</option>
+                                    </select>
+                                    @error('kelurahan')
+                                        <p class="text-[11px] text-red-500 mt-0.5">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Buat Akun Button -->
                         <button type="submit"
                             class="w-full bg-[#003E70] hover:bg-[#002B4E] text-white py-3.5 px-6 rounded-full font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 active:scale-[0.98] transition duration-200 mt-6">
@@ -278,6 +334,123 @@
                 hideIcon.classList.add('hidden');
             }
         }
+    </script>
+
+    <!-- Dropdown wilayah berjenjang (provinsi -> kab/kota -> kecamatan -> kelurahan) -->
+    <script>
+        (function () {
+            const oldValues = {
+                provinsi: @json(old('provinsi')),
+                kabupaten_kota: @json(old('kabupaten_kota')),
+                kecamatan: @json(old('kecamatan')),
+                kelurahan: @json(old('kelurahan')),
+            };
+
+            const selProvinsi = document.getElementById('provinsi');
+            const selKabKota = document.getElementById('kabupaten_kota');
+            const selKecamatan = document.getElementById('kecamatan');
+            const selKelurahan = document.getElementById('kelurahan');
+
+            function resetSelect(select, placeholder) {
+                select.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+                select.disabled = true;
+            }
+
+            function fillSelect(select, items, placeholder, selectedName) {
+                select.innerHTML = `<option value="" disabled ${selectedName ? '' : 'selected'}>${placeholder}</option>`;
+                items.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.nama;
+                    opt.dataset.kode = item.kode;
+                    opt.textContent = item.nama;
+                    if (selectedName && item.nama === selectedName) {
+                        opt.selected = true;
+                    }
+                    select.appendChild(opt);
+                });
+                select.disabled = false;
+            }
+
+            async function loadProvinsi() {
+                try {
+                    const res = await fetch('{{ route('wilayah.provinsi') }}');
+                    const data = await res.json();
+                    fillSelect(selProvinsi, data, 'Pilih Provinsi', oldValues.provinsi);
+                    if (oldValues.provinsi) {
+                        const kode = getSelectedKode(selProvinsi);
+                        if (kode) await loadKabKota(kode, oldValues.kabupaten_kota);
+                    }
+                } catch (e) {
+                    selProvinsi.innerHTML = '<option value="" disabled selected>Gagal memuat provinsi</option>';
+                }
+            }
+
+            async function loadKabKota(kodeProvinsi, selectedName) {
+                resetSelect(selKabKota, 'Memuat...');
+                resetSelect(selKecamatan, 'Pilih kabupaten/kota dulu');
+                resetSelect(selKelurahan, 'Pilih kecamatan dulu');
+                try {
+                    const res = await fetch(`{{ url('/api/wilayah/kabupaten-kota') }}/${kodeProvinsi}`);
+                    const data = await res.json();
+                    fillSelect(selKabKota, data, 'Pilih Kabupaten/Kota', selectedName);
+                    if (selectedName) {
+                        const kode = getSelectedKode(selKabKota);
+                        if (kode) await loadKecamatan(kode, oldValues.kecamatan);
+                    }
+                } catch (e) {
+                    selKabKota.innerHTML = '<option value="" disabled selected>Gagal memuat data</option>';
+                }
+            }
+
+            async function loadKecamatan(kodeKabKota, selectedName) {
+                resetSelect(selKecamatan, 'Memuat...');
+                resetSelect(selKelurahan, 'Pilih kecamatan dulu');
+                try {
+                    const res = await fetch(`{{ url('/api/wilayah/kecamatan') }}/${kodeKabKota}`);
+                    const data = await res.json();
+                    fillSelect(selKecamatan, data, 'Pilih Kecamatan', selectedName);
+                    if (selectedName) {
+                        const kode = getSelectedKode(selKecamatan);
+                        if (kode) await loadKelurahan(kode, oldValues.kelurahan);
+                    }
+                } catch (e) {
+                    selKecamatan.innerHTML = '<option value="" disabled selected>Gagal memuat data</option>';
+                }
+            }
+
+            async function loadKelurahan(kodeKecamatan, selectedName) {
+                resetSelect(selKelurahan, 'Memuat...');
+                try {
+                    const res = await fetch(`{{ url('/api/wilayah/kelurahan') }}/${kodeKecamatan}`);
+                    const data = await res.json();
+                    fillSelect(selKelurahan, data, 'Pilih Kelurahan/Desa', selectedName);
+                } catch (e) {
+                    selKelurahan.innerHTML = '<option value="" disabled selected>Gagal memuat data</option>';
+                }
+            }
+
+            function getSelectedKode(select) {
+                const opt = select.options[select.selectedIndex];
+                return opt ? opt.dataset.kode : null;
+            }
+
+            selProvinsi.addEventListener('change', function () {
+                const kode = getSelectedKode(this);
+                if (kode) loadKabKota(kode, null);
+            });
+
+            selKabKota.addEventListener('change', function () {
+                const kode = getSelectedKode(this);
+                if (kode) loadKecamatan(kode, null);
+            });
+
+            selKecamatan.addEventListener('change', function () {
+                const kode = getSelectedKode(this);
+                if (kode) loadKelurahan(kode, null);
+            });
+
+            loadProvinsi();
+        })();
     </script>
 </body>
 </html>
