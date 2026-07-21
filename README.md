@@ -67,17 +67,19 @@ prisma generate && prisma db push --accept-data-loss && npm run prisma:seed && n
    npm install
    ```
 
-2. **Migrasi Database & Seed Data**:
+2. **Set `DATABASE_URL`** di `.env` ke connection string Postgres (Prisma Postgres / Neon / Vercel Postgres / Supabase). Database harus Postgres — SQLite tidak didukung karena Vercel serverless function memiliki filesystem read-only sehingga file `.db` tidak bisa dipakai di production.
+
+3. **Migrasi Database & Seed Data**:
    ```bash
    npx prisma db push
    npm run prisma:seed
    ```
 
-3. **Jalankan Development Server**:
+4. **Jalankan Development Server**:
    ```bash
    npm run dev
    ```
-   Buka [http://localhost:3000](http://localhost:3000) pada browser.
+   Buka [http://localhost:8000](http://localhost:8000) pada browser.
 
 ---
 
@@ -86,8 +88,9 @@ prisma generate && prisma db push --accept-data-loss && npm run prisma:seed && n
 1. Push repository ke GitHub / GitLab / Bitbucket.
 2. Import repository di [Vercel Dashboard](https://vercel.com).
 3. Set Environment Variable pada Vercel Settings:
-   - `DATABASE_URL`: `file:./dev.db` (atau URL Vercel Postgres / Neon / Supabase untuk produksi serverless)
+   - `DATABASE_URL`: connection string Postgres (Prisma Postgres / Vercel Postgres / Neon / Supabase)
    - `JWT_SECRET`: `vokasi-riasec-secret-key-2026-super-secure`
+   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` (lihat bagian Setup Login dengan Google di atas)
 4. Klik **Deploy**.
 5. Akses `https://DOMAIN-VERCEL-ANDA.vercel.app/api/seed` untuk inisialisasi awal data seeder di Vercel.
 
