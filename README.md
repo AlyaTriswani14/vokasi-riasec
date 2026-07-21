@@ -1,58 +1,101 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Ekosistem Vokasi RIASEC (Next.js & Vercel Ready)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Platform Asesmen Minat Bakat Holland (RIASEC) Vokasi Kementerian Pendidikan Dasar dan Menengah RI. Project ini dibangun menggunakan **Next.js (App Router)**, **React 19**, **Tailwind CSS**, dan **Prisma ORM** yang fully compatible dengan deployment **Vercel**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🔑 Default Credentials (Akses Admin)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 1. Admin Direktorat SMK (Kemendikdasmen)
+- **URL Login**: `/kemendikdasmen/login`
+- **Email**: `admin@kemendikdasmen.go.id`
+- **Password**: `password123`
+- **Akses**: Kelola User Management Sekolah, Bank Soal RIASEC, Pengaturan Durasi/Kuota Sistem, Broadcast Pengumuman Massal.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Admin Sekolah (Guru BK Binaan)
+- **URL Login**: `/guru-bk/login`
+- **Email**: `gurubk@smkn1jakarta.sch.id`
+- **Password**: `password123`
+- **Akses**: Pantau daftar siswa binaan sekolah, status tes RIASEC, breakdown persentase minat siswa, Export CSV hasil tes.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🌱 Skrip Seeder (Pertama Kali Install di Vercel / Lokal)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Tersedia **3 Cara** untuk menjalankan skrip seeder saat pertama kali melakukan instalasi di Vercel atau environment lokal:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+### Cara 1: Via Endpoint HTTP 1-Click (Rekomendasi Utama di Vercel)
+Setelah aplikasi di-deploy di Vercel, Anda dapat membuka URL endpoint berikut di browser atau cURL:
+```text
+https://DOMAIN-VERCEL-ANDA.vercel.app/api/seed
+```
+Endpoint ini menggunakan `upsert` aman sehingga dapat dipanggil kapan saja tanpa merusak data yang sudah ada.
 
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### Cara 2: Skrip CLI Lokal
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+npm run prisma:seed
+# atau
+npx prisma db seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Cara 3: Otomatisasi Build Command Vercel (Opsi)
+Jika Anda menggunakan database serverless (seperti Vercel Postgres, Neon, atau Supabase), Anda bisa menyetel **Build Command** pada Vercel Settings menjadi:
+```bash
+prisma generate && prisma db push --accept-data-loss && npm run prisma:seed && next build
+```
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 
-## Code of Conduct
+1. **Install Dependensi**:
+   ```bash
+   npm install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Migrasi Database & Seed Data**:
+   ```bash
+   npx prisma db push
+   npm run prisma:seed
+   ```
 
-## Security Vulnerabilities
+3. **Jalankan Development Server**:
+   ```bash
+   npm run dev
+   ```
+   Buka [http://localhost:3000](http://localhost:3000) pada browser.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## ☁️ Deployment ke Vercel
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. Push repository ke GitHub / GitLab / Bitbucket.
+2. Import repository di [Vercel Dashboard](https://vercel.com).
+3. Set Environment Variable pada Vercel Settings:
+   - `DATABASE_URL`: `file:./dev.db` (atau URL Vercel Postgres / Neon / Supabase untuk produksi serverless)
+   - `JWT_SECRET`: `vokasi-riasec-secret-key-2026-super-secure`
+4. Klik **Deploy**.
+5. Akses `https://DOMAIN-VERCEL-ANDA.vercel.app/api/seed` untuk inisialisasi awal data seeder di Vercel.
+
+---
+
+## 🌟 Fitur Utama
+
+- **Siswa**:
+  - Pemilihan Jenjang (SMP / SMK).
+  - Autentikasi & Pengisian Profil Domisili bertingkat (Provinsi -> Kabupaten/Kota -> Kecamatan -> Kelurahan).
+  - Tes RIASEC dengan Timer Countdown interaktif.
+  - Hasil & Rekomendasi Jurusan Vokasi beserta pencarian **SMK Terdekat** bertingkat (*Sekelurahan -> Sekecamatan -> Sekabupaten/Kota -> Seprovinsi*).
+  - Eksplorasi Keahlian & Detail Jurusan Vokasi.
+
+- **Guru BK**:
+  - Dashboard pemantauan siswa binaan.
+  - Detail breakdown poin & persentase aspek RIASEC siswa.
+  - Export data hasil tes ke format CSV.
+
+- **Admin Kemendikdasmen**:
+  - Analytics Nasional.
+  - User Management (Kelola Sekolah & Guru BK).
+  - Bank Soal RIASEC (CRUD & Status Soal).
+  - System Settings (Durasi Timer Tes, Target Kuota, Tahun Ajaran).
+  - Broadcast Center.

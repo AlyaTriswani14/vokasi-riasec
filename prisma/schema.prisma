@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int            @id @default(autoincrement())
+  name           String
+  email          String         @unique
+  password       String
+  role           String         @default("siswa") // siswa, guru_bk, kemendikdasmen
+  jenjang        String?        // smp, smk
+  nisn           String?        @unique
+  asal_sekolah   String?
+  npsn           String?
+  nama_sekolah   String?
+  kelas          String?
+  provinsi       String?
+  kabupaten_kota String?
+  kecamatan      String?
+  kelurahan      String?
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  results        RiasecResult[]
+
+  @@map("users")
+}
+
+model RiasecResult {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  skorR     Int      @default(0) @map("skor_r")
+  skorI     Int      @default(0) @map("skor_i")
+  skorA     Int      @default(0) @map("skor_a")
+  skorS     Int      @default(0) @map("skor_s")
+  skorE     Int      @default(0) @map("skor_e")
+  skorC     Int      @default(0) @map("skor_c")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("riasec_results")
+}
+
+model SoalRiasec {
+  id         Int      @id @default(autoincrement())
+  pernyataan String
+  aspek      String   // R, I, A, S, E, C
+  urutan     Int      @default(0)
+  status     String   @default("aktif") // aktif, nonaktif
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("soal_riasecs")
+}
+
+model Pengaturan {
+  id        Int      @id @default(autoincrement())
+  kunci     String   @unique
+  nilai     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("pengaturans")
+}
+
+model Broadcast {
+  id             Int      @id @default(autoincrement())
+  subjek         String
+  isi            String
+  targetPenerima String   @map("target_penerima") // siswa, guru_bk, semua
+  targetJenjang  String   @map("target_jenjang")  // smp, smk, semua
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("broadcasts")
+}
+
+model Wilayah {
+  id    Int    @id @default(autoincrement())
+  kode  String @unique
+  nama  String
+  level Int    // 1: Provinsi, 2: Kab/Kota, 3: Kec, 4: Kel
+  induk String // Kode induk
+
+  @@map("wilayah")
+}
+
+model Sekolah {
+  id            Int     @id @default(autoincrement())
+  npsn          String  @unique
+  namaSekolah   String  @map("nama_sekolah")
+  jenjang       String  @default("smk")
+  provinsi      String
+  kabupatenKota String  @map("kabupaten_kota")
+  kecamatan     String
+  kelurahan     String?
+
+  @@map("sekolah")
+}
