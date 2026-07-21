@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import BottomNav from "@/components/BottomNav";
 import TopHeader from "@/components/TopHeader";
+import RiasecCharts from "@/components/RiasecCharts";
 import { getJenjangTheme } from "@/lib/theme";
 import { REKOM_JURUSAN, REKOM_SKILL, TIPE_LABELS, RiasecCode, slugify } from "@/lib/riasecData";
 import { Compass, Star, GraduationCap, ChevronRight } from "lucide-react";
@@ -73,6 +74,9 @@ export default async function EksplorasiPage() {
           </div>
         ) : (
           <>
+            {/* Sebaran RIASEC + Bentuk Minat */}
+            <RiasecCharts persenArr={persenArr} gradFrom={theme.gradFrom} accentBorder={theme.accentBorder} />
+
             {/* 3 tipe dominan */}
             <div className="rounded-2xl p-5 text-white shadow-sm relative overflow-hidden" style={theme.gradientStyle}>
               <p className="text-[10px] font-bold text-white/80 tracking-wider uppercase mb-3 text-center">3 Tipe Dominan Kamu</p>
@@ -91,7 +95,7 @@ export default async function EksplorasiPage() {
             {/* Rincian semua skor */}
             <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
               <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-3">Rincian Skor</p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {(Object.entries(persenArr) as [RiasecCode, number][]).map(([kode, persen]) => (
                   <div key={kode} className={`rounded-xl ${theme.accentBg} p-3 text-center`}>
                     <p className={`text-lg font-extrabold ${theme.accentText}`}>{persen}%</p>
@@ -111,7 +115,7 @@ export default async function EksplorasiPage() {
               <p className="text-xs text-gray-500 mb-4">
                 Berdasarkan tipe dominan kamu: <span className={`${theme.accentText} font-bold`}>{TIPE_LABELS[tipeDominan]}</span>
               </p>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {(theme.isSmk ? REKOM_SKILL[tipeDominan] : REKOM_JURUSAN[tipeDominan]).map((item) =>
                   theme.isSmk ? (
                     <div key={item} className={`bg-white border ${theme.accentBorder} rounded-2xl p-4 shadow-sm flex items-center gap-3`}>
