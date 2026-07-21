@@ -46,6 +46,20 @@ prisma generate && prisma db push --accept-data-loss && npm run prisma:seed && n
 
 ---
 
+## 🔐 Setup Login dengan Google (OAuth)
+
+1. Buka [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) dan buat **OAuth 2.0 Client ID** (tipe Web application).
+2. Tambahkan **Authorized redirect URIs**:
+   - Lokal: `http://127.0.0.1:8000/auth/google/callback`
+   - Production (Vercel): `https://DOMAIN-VERCEL-ANDA.vercel.app/auth/google/callback`
+3. Set environment variable (di `.env` untuk lokal, di Vercel Project Settings untuk production):
+   - `GOOGLE_CLIENT_ID`
+   - `GOOGLE_CLIENT_SECRET`
+   - `GOOGLE_REDIRECT_URI` — harus **persis sama** dengan URI yang didaftarkan di langkah 2 (sesuai environment yang sedang jalan).
+4. Server dev lokal berjalan di port `8000` (`npm run dev`) agar cocok dengan redirect URI di atas.
+
+---
+
 ## 🚀 Cara Menjalankan Aplikasi Secara Lokal
 
 1. **Install Dependensi**:

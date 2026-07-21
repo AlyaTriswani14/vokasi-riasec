@@ -6,7 +6,7 @@ import { createToken } from "@/lib/auth";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { email, password } = body;
+    const { email, password, remember } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email dan password wajib diisi." }, { status: 400 });
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: remember ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7,
     });
 
     return response;

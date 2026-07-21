@@ -1,74 +1,107 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, CheckCircle, Briefcase, Award } from "lucide-react";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
+import { ArrowLeft, BookOpen, Award, Briefcase } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import TopHeader from "@/components/TopHeader";
+import { getJenjangTheme } from "@/lib/theme";
+import { JURUSAN_DATA, POTENSI_WARNA } from "@/lib/riasecData";
 
 export default async function JurusanDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  const user = await getSession();
+  if (!user) redirect("/login");
+
   const { slug } = await params;
+  const theme = getJenjangTheme(user.jenjang);
+  const j = JURUSAN_DATA[slug];
+
   const readableTitle = slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 max-w-md mx-auto relative shadow-2xl">
-      <div className="bg-gradient-to-br from-purple-700 to-indigo-800 p-6 pt-10 text-white rounded-b-3xl">
-        <Link href="/eksplorasi" className="inline-flex items-center gap-1 text-xs text-purple-200 mb-3 hover:text-white">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Eksplorasi
+    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+      <TopHeader name={user.name} />
+
+      <main className="flex flex-col gap-5 px-4 pt-6 pb-12">
+        <Link href="/eksplorasi" className="inline-flex items-center gap-2 text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors w-fit">
+          <ArrowLeft className="w-3.5 h-3.5" /> Kembali ke Eksplorasi
         </Link>
-        <h1 className="text-2xl font-extrabold">{readableTitle}</h1>
-        <p className="text-xs text-purple-200 mt-1">
-          Panduan kompetensi, materi pembelajaran, dan prospek karir lulusan.
-        </p>
-      </div>
 
-      <div className="p-4 space-y-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-          <div className="flex items-center gap-2 text-purple-600 font-extrabold text-xs">
-            <BookOpen className="w-4 h-4" /> Deskripsi Keahlian
+        {!j ? (
+          <div className={`bg-white border ${theme.accentBorder} rounded-3xl p-10 shadow-sm text-center`}>
+            <p className="text-sm text-gray-500">Detail jurusan &quot;{readableTitle}&quot; belum tersedia.</p>
           </div>
-          <p className="text-xs text-slate-600 leading-relaxed">
-            Keahlian bidang <span className="font-bold">{readableTitle}</span> membekali siswa dengan pengetahuan teori dasar, keahlian praktis laboratorium/bengkel, dan pengalaman proyek industri riil sesuai standar DU/DI (Dunia Usaha & Dunia Industri).
-          </p>
-
-          <div className="border-t border-slate-100 pt-3">
-            <h4 className="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-500" /> Kompetensi Utama yang Dipelajari:
-            </h4>
-            <ul className="text-xs text-slate-600 space-y-1.5">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Penguasaan Standar Operasional Industri
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Troubleshooting & Analisis Kasus Teknik
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" /> Sertifikasi Profesi Nasional (BNSP)
-              </li>
-            </ul>
-          </div>
-
-          <div className="border-t border-slate-100 pt-3">
-            <h4 className="text-xs font-bold text-slate-800 mb-2 flex items-center gap-1.5">
-              <Briefcase className="w-4 h-4 text-blue-500" /> Prospek Karir & Pekerjaan:
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-lg">
-                Teknisi Ahli
-              </span>
-              <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-lg">
-                Supervisor Proyek
-              </span>
-              <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-lg">
-                Wirausaha Mandiri
-              </span>
+        ) : (
+          <>
+            {/* Hero */}
+            <div className="rounded-3xl p-6 shadow-lg relative overflow-hidden text-white" style={theme.gradientStyle}>
+              <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl mb-4">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <span className="bg-white/25 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">Jurusan SMK</span>
+                <h1 className="text-2xl font-extrabold mt-3">{j.nama}</h1>
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+
+            {/* Tentang */}
+            <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+              <h3 className="font-bold text-gray-800 text-base mb-3">Tentang Jurusan</h3>
+              <p className="text-sm text-gray-600 leading-relaxed">{j.deskripsi}</p>
+            </div>
+
+            {/* Kompetensi */}
+            <div>
+              <h3 className="font-bold text-gray-800 text-base mb-3 pl-1">Kompetensi Utama</h3>
+              <div className="grid grid-cols-1 gap-4">
+                {j.kompetensi.map((k) => (
+                  <div key={k.judul} className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+                    <div className={`w-10 h-10 rounded-xl ${theme.accentBg} ${theme.accentText} flex items-center justify-center mb-4`}>
+                      <Award className="w-4 h-4" />
+                    </div>
+                    <h4 className={`text-[10px] font-bold ${theme.accentText} tracking-wider mb-2 uppercase`}>{k.judul}</h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">{k.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Prospek karir */}
+            <div>
+              <h3 className="font-bold text-gray-800 text-base mb-3 pl-1">Prospek Karir</h3>
+              <div className={`bg-white rounded-2xl border ${theme.accentBorder} shadow-sm overflow-hidden`}>
+                <div className="flex justify-between p-4 text-white text-xs font-bold tracking-wide" style={theme.gradientStyle}>
+                  <span>Jabatan</span>
+                  <span>Potensi</span>
+                </div>
+                {j.karir.map((k, idx) => (
+                  <div
+                    key={k.jabatan}
+                    className={`flex justify-between items-center p-4 ${
+                      idx !== j.karir.length - 1 ? "border-b border-gray-100" : ""
+                    } hover:bg-gray-50 transition-colors`}
+                  >
+                    <div className="flex items-center gap-3 text-sm text-gray-800 font-medium">
+                      <Briefcase className="w-4 h-4 text-gray-400" />
+                      <span>{k.jabatan}</span>
+                    </div>
+                    <span className={`${POTENSI_WARNA[k.potensi] || "bg-gray-100 text-gray-500"} text-[10px] font-bold px-2.5 py-1 rounded`}>
+                      {k.potensi}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </main>
 
       <BottomNav />
     </div>

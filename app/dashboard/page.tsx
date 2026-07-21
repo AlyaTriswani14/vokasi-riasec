@@ -3,7 +3,9 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import BottomNav from "@/components/BottomNav";
-import { Sparkles, ArrowRight, Play, CheckCircle, Award } from "lucide-react";
+import TopHeader from "@/components/TopHeader";
+import { getJenjangTheme, RIASEC_LABELS } from "@/lib/theme";
+import { Check, Compass, Megaphone } from "lucide-react";
 
 export default async function DashboardPage() {
   const user = await getSession();
@@ -16,109 +18,157 @@ export default async function DashboardPage() {
     redirect("/lengkapi-profil");
   }
 
-  const latestResult = await prisma.riasecResult.findFirst({
+  const theme = getJenjangTheme(user.jenjang);
+
+  const hasilTes = await prisma.riasecResult.findFirst({
     where: { userId: user.id },
     orderBy: { createdAt: "desc" },
   });
 
-  let top3: Array<{ code: string; label: string; desc: string; score: number }> = [];
-
-  if (latestResult) {
-    const scores = [
-      { code: "R", label: "Realistic (Praktis)", desc: "Menyukai aktivitas fisik, mesin, dan praktik.", score: latestResult.skorR },
-      { code: "I", label: "Investigative (Pemikir)", desc: "Gemar mengamati, menganalisis, dan sains.", score: latestResult.skorI },
-      { code: "A", label: "Artistic (Kreatif)", desc: "Ekspresif, kreatif, dan seni visual.", score: latestResult.skorA },
-      { code: "S", label: "Social (Penolong)", desc: "Senang membantu dan mengajar sesama.", score: latestResult.skorS },
-      { code: "E", label: "Enterprising (Pemimpin)", desc: "Memengaruhi orang lain dan berjiwa kepemimpinan.", score: latestResult.skorE },
-      { code: "C", label: "Conventional (Teratur)", desc: "Menyukai data, rapi, dan terstruktur.", score: latestResult.skorC },
-    ];
-
-    scores.sort((a, b) => b.score - a.score);
-    top3 = scores.slice(0, 3);
+  let tipeDominan: string | null = null;
+  if (hasilTes) {
+    const skor: Record<string, number> = {
+      R: hasilTes.skorR,
+      I: hasilTes.skorI,
+      A: hasilTes.skorA,
+      S: hasilTes.skorS,
+      E: hasilTes.skorE,
+      C: hasilTes.skorC,
+    };
+    const top = Object.entries(skor).sort((a, b) => b[1] - a[1])[0][0];
+    tipeDominan = RIASEC_LABELS[top];
   }
 
+  // Pengumuman dari Admin Direktorat, disaring sesuai target penerima & jenjang siswa.
+  const pengumuman = await prisma.broadcast.findMany({
+    where: {
+      targetPenerima: { in: ["siswa", "semua"] },
+      targetJenjang: { in: [user.jenjang || "smp", "semua"] },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
+  });
+
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 max-w-md mx-auto relative shadow-2xl">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-br from-purple-700 via-indigo-600 to-blue-600 p-6 pt-10 text-white rounded-b-3xl shadow-lg relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <p className="text-xs text-purple-200 uppercase font-bold tracking-wider">
-              {user.jenjang === "smk" ? "Siswa SMK" : "Siswa SMP/MTs"}
-            </p>
-            <h1 className="text-2xl font-extrabold">Halo, {user.name.split(" ")[0]}! 👋</h1>
-          </div>
-          <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center font-bold text-xl border border-white/30">
-            🎓
+    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+      <TopHeader name={user.name} />
+
+      <main className="flex flex-col gap-5 px-4 pt-6 pb-12">
+        {/* Hero */}
+        <div className="rounded-3xl p-6 shadow-lg relative overflow-hidden text-white" style={theme.gradientStyle}>
+          <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />
+          <div className="relative z-10 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl shrink-0">
+              🎓
+            </div>
+            <div>
+              <p className="text-xs text-white/80 mb-0.5">Halo, semangat terus!</p>
+              <h2 className="font-extrabold text-xl">{user.name}</h2>
+              <span className="inline-block bg-white/25 text-[10px] font-bold px-2.5 py-1 rounded-full mt-1.5">
+                {theme.badgeLabel}
+              </span>
+            </div>
           </div>
         </div>
-        <p className="text-xs text-purple-100 font-medium">
-          {user.asal_sekolah} • {user.provinsi}
-        </p>
-      </div>
 
-      <div className="p-4 space-y-5">
-        {/* Assessment Card */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
-                Tes Minat Bakat
-              </span>
-              <h2 className="text-base font-extrabold text-slate-800 mt-2">Asesmen Holland RIASEC</h2>
+        {/* Status + hasil terakhir */}
+        <div className="grid grid-cols-1 gap-4">
+          <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+            <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Status Tes Minat</p>
+            <div className="flex items-center gap-2 mb-3">
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-sm ${
+                  hasilTes ? "bg-[#dcfce7] text-[#16a34a]" : "bg-gray-100 text-gray-400"
+                }`}
+              >
+                <Check className="w-3.5 h-3.5" />
+              </div>
+              <h3 className={`font-bold text-xl ${hasilTes ? "text-[#16a34a]" : "text-gray-400"}`}>
+                {hasilTes ? "Selesai" : "Belum Tes"}
+              </h3>
             </div>
-            {latestResult ? (
-              <CheckCircle className="w-6 h-6 text-emerald-500" />
+            {hasilTes ? (
+              <p className="text-xs text-gray-500">
+                Tes terakhir: {hasilTes.createdAt.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+              </p>
             ) : (
-              <Sparkles className="w-6 h-6 text-purple-500 animate-pulse" />
+              <p className="text-xs text-red-500">Silakan lakukan tes terlebih dahulu.</p>
             )}
           </div>
 
-          <p className="text-xs text-slate-500 mb-4 leading-relaxed">
-            {latestResult
-              ? "Kamu telah menyelesaikan tes RIASEC. Kamu dapat melihat hasil dan rekomendasi jurusan kapan saja."
-              : "Jawab pertanyaan singkat untuk menemukan tipe kepribadian dan jurusan vokasi yang pas buatmu!"}
-          </p>
+          <div className="rounded-2xl p-5 text-white shadow-sm relative overflow-hidden" style={theme.gradientStyle}>
+            <p className="text-[10px] font-bold text-white/80 tracking-wider uppercase mb-3">Hasil Terakhir</p>
+            {hasilTes ? (
+              <p className="text-sm">
+                Skor R: {hasilTes.skorR}, I: {hasilTes.skorI}, A: {hasilTes.skorA}
+              </p>
+            ) : (
+              <p className="text-sm">Data belum tersedia.</p>
+            )}
+          </div>
+        </div>
 
+        {/* Kartu highlight pembeda SMP / SMK */}
+        <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+          <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">
+            {theme.isSmk ? "Progress Eksplorasi Skill" : "Rekomendasi Awal"}
+          </p>
+          {hasilTes ? (
+            <>
+              <h3 className={`font-bold ${theme.accentText} text-lg mb-1`}>Tipe dominan kamu: {tipeDominan}</h3>
+              <p className="text-xs text-gray-600 mb-4">
+                {theme.isSmk
+                  ? "Lihat rekomendasi keahlian tambahan (soft skill & hard skill) di luar jurusanmu."
+                  : "Lihat rekomendasi jurusan SMK yang paling cocok buat kamu."}
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 className="font-bold text-gray-400 text-lg mb-1">Belum ada data</h3>
+              <p className="text-xs text-gray-500 mb-4">Selesaikan tes minat dulu supaya kami bisa kasih rekomendasi.</p>
+            </>
+          )}
           <Link
-            href="/assessment"
-            className="w-full inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl text-xs shadow-md shadow-purple-200 transition-all"
+            href="/eksplorasi"
+            className={`inline-flex items-center gap-1.5 ${theme.accentBtn} text-white text-xs font-bold py-2 px-4 rounded-lg transition-colors`}
           >
-            {latestResult ? "Lihat / Ulangi Tes RIASEC" : "Mulai Tes RIASEC"} <ArrowRight className="w-4 h-4" />
+            <Compass className="w-3.5 h-3.5" /> Buka Eksplorasi
           </Link>
         </div>
 
-        {/* RIASEC Top 3 Results */}
-        {latestResult && top3.length > 0 && (
-          <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm space-y-3">
-            <div className="flex items-center gap-2 text-slate-800 font-extrabold text-sm">
-              <Award className="w-5 h-5 text-amber-500" />
-              <h3>Top 3 Minat Dominanmu</h3>
+        {/* Pengumuman */}
+        <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+          <div className="flex items-center gap-2 mb-4">
+            <div className={`w-8 h-8 rounded-lg ${theme.accentBg} ${theme.accentText} flex items-center justify-center`}>
+              <Megaphone className="w-4 h-4" />
             </div>
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">Pengumuman</p>
+              <h3 className="font-bold text-gray-800 text-sm">Info &amp; Berita Terbaru</h3>
+            </div>
+          </div>
 
-            <div className="grid grid-cols-3 gap-2">
-              {top3.map((item, idx) => (
-                <div
-                  key={item.code}
-                  className="bg-slate-50 border border-slate-100 p-3 rounded-xl text-center flex flex-col justify-between"
-                >
-                  <span className="text-xs font-black text-purple-600">#{idx + 1}</span>
-                  <span className="text-lg font-black text-slate-800">{item.code}</span>
-                  <span className="text-[10px] text-slate-500 font-bold truncate">{item.label.split(" ")[0]}</span>
+          {pengumuman.length === 0 ? (
+            <div className="text-center py-6">
+              <p className="text-xs text-gray-400">Belum ada pengumuman untuk saat ini.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {pengumuman.map((p: (typeof pengumuman)[number]) => (
+                <div key={p.id} className={`border ${theme.accentBorder} rounded-xl p-4`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="font-bold text-gray-800 text-sm">{p.subjek}</h4>
+                    <span className="text-[10px] text-gray-400 whitespace-nowrap shrink-0">
+                      {p.createdAt.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1.5 whitespace-pre-line">{p.isi}</p>
                 </div>
               ))}
             </div>
-
-            <Link
-              href="/rekomendasi"
-              className="inline-flex items-center justify-center gap-1.5 text-purple-600 font-bold text-xs hover:underline mt-2"
-            >
-              Lihat Rekomendasi Jurusan Lengkap <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </main>
 
       <BottomNav />
     </div>

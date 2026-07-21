@@ -11,6 +11,7 @@ export default function GuruBkDaftarPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [namaSekolah, setNamaSekolah] = useState("");
   const [npsn, setNpsn] = useState("");
   const [jenjang, setJenjang] = useState("smk");
@@ -21,6 +22,17 @@ export default function GuruBkDaftarPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (password.length < 8) {
+      setError("Password minimal 8 karakter.");
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError("Konfirmasi password tidak cocok.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -90,16 +102,31 @@ export default function GuruBkDaftarPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimal 6 karakter"
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Minimal 8 karakter"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Ulangi Password</label>
+              <input
+                type="password"
+                required
+                minLength={8}
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+                placeholder="Ulangi password"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -125,6 +152,7 @@ export default function GuruBkDaftarPage() {
                 placeholder="20100001"
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
               />
+              <p className="text-[10px] text-slate-400 mt-1">Satu sekolah hanya bisa punya satu akun.</p>
             </div>
           </div>
 
@@ -149,11 +177,18 @@ export default function GuruBkDaftarPage() {
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-500">
-          Sudah punya akun?{" "}
-          <Link href="/guru-bk/login" className="text-teal-700 font-bold hover:underline">
-            Masuk di sini
-          </Link>
+        <div className="mt-6 text-center text-xs text-slate-500 space-y-2">
+          <div>
+            Sudah punya akun?{" "}
+            <Link href="/guru-bk/login" className="text-teal-700 font-bold hover:underline">
+              Masuk di sini
+            </Link>
+          </div>
+          <div>
+            <Link href="/pilih-admin" className="text-slate-400 hover:text-slate-600 font-medium inline-flex items-center gap-1">
+              <ArrowLeft className="w-3 h-3" /> Pilih Peran Lain
+            </Link>
+          </div>
         </div>
       </div>
     </main>

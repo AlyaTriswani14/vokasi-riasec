@@ -3,16 +3,18 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import BottomNav from "@/components/BottomNav";
-import { FileText, Clock, CheckCircle2, ArrowRight } from "lucide-react";
+import TopHeader from "@/components/TopHeader";
+import { getJenjangTheme } from "@/lib/theme";
+import { ClipboardCheck, ListOrdered, Smile, Clock, TriangleAlert } from "lucide-react";
 
 export default async function AssessmentGuidePage() {
   const user = await getSession();
 
   if (!user) redirect("/login");
 
-  const latestResult = await prisma.riasecResult.findFirst({
-    where: { userId: user.id },
-  });
+  const theme = getJenjangTheme(user.jenjang);
+
+  const totalSoal = await prisma.soalRiasec.count({ where: { status: "aktif" } });
 
   const durasiSetting = await prisma.pengaturan.findUnique({
     where: { kunci: "durasi_tes_menit" },
@@ -21,50 +23,65 @@ export default async function AssessmentGuidePage() {
   const durasiMenit = parseInt(durasiSetting?.nilai || "5", 10);
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 max-w-md mx-auto relative shadow-2xl">
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 pt-10 text-white rounded-b-3xl">
-        <h1 className="text-2xl font-extrabold flex items-center gap-2">
-          <FileText className="w-6 h-6" /> Tes RIASEC
-        </h1>
-        <p className="text-xs text-purple-100 mt-1">
-          Panduan pelaksanaan tes kecocokan minat & bakat.
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+      <TopHeader name={user.name} />
 
-      <div className="p-4 space-y-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 bg-amber-50 text-amber-900 p-3 rounded-xl border border-amber-200">
-            <Clock className="w-6 h-6 text-amber-600 shrink-0" />
-            <div className="text-xs">
-              <span className="font-bold block text-sm">Durasi Tes: {durasiMenit} Menit</span>
-              Timer akan otomatis berjalan setelah kamu menekan tombol Mulai.
+      <main className="px-4 pt-6 pb-12">
+        <div className={`bg-white p-8 rounded-3xl shadow-lg border ${theme.accentBorder} text-center relative overflow-hidden`}>
+          <div className="absolute w-28 h-28 rounded-full -top-10 -right-10 opacity-10" style={theme.gradientStyle} />
+          <div className="relative z-10">
+            <div
+              className="w-14 h-14 mx-auto rounded-full flex items-center justify-center text-white mb-4"
+              style={theme.gradientStyle}
+            >
+              <ClipboardCheck className="w-6 h-6" />
             </div>
+            <h2 className="text-xl font-extrabold text-gray-800 mb-2">Sebelum Mulai Tes</h2>
+            <p className="text-sm text-gray-500 mb-6">Baca dulu ketentuannya ya, biar hasil tesmu akurat.</p>
+
+            <div className="flex flex-col gap-3 text-left mb-8">
+              <div className="flex items-start gap-3">
+                <div className={`w-7 h-7 shrink-0 rounded-lg ${theme.accentBg} ${theme.accentText} flex items-center justify-center mt-0.5`}>
+                  <ListOrdered className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs text-gray-600">
+                  Ada <span className="font-bold text-gray-800">{totalSoal} pertanyaan</span>, jawab{" "}
+                  <span className="font-bold text-gray-800">YA</span> atau <span className="font-bold text-gray-800">TIDAK</span> satu per satu.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className={`w-7 h-7 shrink-0 rounded-lg ${theme.accentBg} ${theme.accentText} flex items-center justify-center mt-0.5`}>
+                  <Smile className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs text-gray-600">Tidak ada jawaban benar atau salah — jawab sesuai apa yang kamu rasakan.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className={`w-7 h-7 shrink-0 rounded-lg ${theme.accentBg} ${theme.accentText} flex items-center justify-center mt-0.5`}>
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs text-gray-600">
+                  Waktu pengerjaan <span className="font-bold text-gray-800">{durasiMenit} menit</span>. Kalau waktu habis, jawaban yang sudah
+                  kamu isi otomatis terkirim.
+                </p>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className={`w-7 h-7 shrink-0 rounded-lg ${theme.accentBg} ${theme.accentText} flex items-center justify-center mt-0.5`}>
+                  <TriangleAlert className="w-3.5 h-3.5" />
+                </div>
+                <p className="text-xs text-gray-600">Jangan tutup atau refresh halaman sampai tesnya selesai.</p>
+              </div>
+            </div>
+
+            <Link
+              href="/assessment/questions"
+              className="w-full block text-white font-bold text-sm py-4 rounded-2xl transition-transform active:scale-95 shadow-md"
+              style={theme.gradientStyle}
+            >
+              Mulai Tes Sekarang
+            </Link>
           </div>
-
-          <h3 className="font-extrabold text-slate-800 text-sm">Petunjuk Pengisian:</h3>
-          <ul className="text-xs text-slate-600 space-y-2">
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-              <span>Pilih &quot;YA&quot; pada setiap pernyataan yang sesuai dengan kepribadian atau kesukaanmu.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-              <span>Jawab secara jujur sesuai diri sendiri tanpa dipengaruhi orang lain.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
-              <span>Hasil tes akan langsung mengelompokkan 3 tipe RIASEC dominanmu.</span>
-            </li>
-          </ul>
-
-          <Link
-            href="/assessment/questions"
-            className="w-full inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-4 rounded-xl text-sm shadow-lg shadow-purple-200 transition-all mt-4"
-          >
-            {latestResult ? "Ulangi Tes Sekarang" : "Mulai Tes Sekarang"} <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
-      </div>
+      </main>
 
       <BottomNav />
     </div>

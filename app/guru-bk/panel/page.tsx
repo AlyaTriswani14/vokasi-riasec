@@ -2,7 +2,36 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { School, Download, Users, CheckCircle, Clock, Search, LogOut } from "lucide-react";
+import { School, Download, Users, CheckCircle, Clock, Search, LogOut, Megaphone } from "lucide-react";
+
+const TIPE_LABELS: Record<string, string> = {
+  R: "Realistic",
+  I: "Investigative",
+  A: "Artistic",
+  S: "Social",
+  E: "Enterprising",
+  C: "Conventional",
+};
+
+function tipeDominan(hasil?: {
+  skorR: number;
+  skorI: number;
+  skorA: number;
+  skorS: number;
+  skorE: number;
+  skorC: number;
+} | null) {
+  if (!hasil) return null;
+  const skor: Record<string, number> = {
+    R: hasil.skorR,
+    I: hasil.skorI,
+    A: hasil.skorA,
+    S: hasil.skorS,
+    E: hasil.skorE,
+    C: hasil.skorC,
+  };
+  return Object.entries(skor).sort((a, b) => b[1] - a[1])[0][0];
+}
 
 export default async function GuruBkPanelPage({
   searchParams,
@@ -28,6 +57,19 @@ export default async function GuruBkPanelPage({
       },
     },
     orderBy: { name: "asc" },
+  });
+
+  // Pengumuman dari Admin Direktorat SMK yang relevan untuk peran guru_bk,
+  // menyesuaikan target penerima & jenjang sekolah (meniru Broadcast::untukUser()).
+  const pengumuman = await prisma.broadcast.findMany({
+    where: {
+      AND: [
+        { OR: [{ targetPenerima: "guru_bk" }, { targetPenerima: "semua" }] },
+        { OR: [{ targetJenjang: user.jenjang || undefined }, { targetJenjang: "semua" }] },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 5,
   });
 
   const totalSiswa = allSiswa.length;
@@ -111,6 +153,34 @@ export default async function GuruBkPanelPage({
           </div>
         </div>
 
+        {/* Pengumuman dari Kemendikdasmen */}
+        {pengumuman.length > 0 && (
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-teal-700 flex items-center justify-center">
+                <Megaphone className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 tracking-wider uppercase">Pengumuman</p>
+                <h3 className="font-bold text-slate-800 text-sm">Info dari Direktorat SMK</h3>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              {pengumuman.map((p) => (
+                <div key={p.id} className="border border-slate-100 rounded-xl p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <h4 className="font-bold text-slate-800 text-sm">{p.subjek}</h4>
+                    <span className="text-[10px] text-slate-400 whitespace-nowrap shrink-0">
+                      {new Date(p.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1.5 whitespace-pre-line">{p.isi}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Student Table & Filters */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -153,19 +223,21 @@ export default async function GuruBkPanelPage({
                   <th className="p-3">NISN</th>
                   <th className="p-3">Status Tes</th>
                   <th className="p-3">Tanggal Tes</th>
+                  <th className="p-3">RIASEC Dominan</th>
                   <th className="p-3">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredSiswa.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="p-6 text-center text-slate-400">
+                    <td colSpan={7} className="p-6 text-center text-slate-400">
                       Tidak ada data siswa ditemukan.
                     </td>
                   </tr>
                 ) : (
                   filteredSiswa.map((siswa) => {
                     const hasil = siswa.results[0];
+                    const dominan = tipeDominan(hasil);
                     return (
                       <tr key={siswa.id} className="hover:bg-slate-50/80">
                         <td className="p-3 font-bold text-slate-800">{siswa.name}</td>
@@ -186,16 +258,21 @@ export default async function GuruBkPanelPage({
                           {hasil ? new Date(hasil.createdAt).toLocaleDateString("id-ID") : "-"}
                         </td>
                         <td className="p-3">
-                          {hasil ? (
-                            <Link
-                              href={`/guru-bk/siswa/${siswa.id}`}
-                              className="text-teal-700 font-bold hover:underline text-[11px]"
-                            >
-                              Detail Hasil
-                            </Link>
+                          {dominan ? (
+                            <span className="bg-blue-50 text-teal-700 font-bold px-2 py-0.5 rounded-full text-[10px]">
+                              {TIPE_LABELS[dominan]} ({dominan})
+                            </span>
                           ) : (
                             <span className="text-slate-300">-</span>
                           )}
+                        </td>
+                        <td className="p-3">
+                          <Link
+                            href={`/guru-bk/siswa/${siswa.id}`}
+                            className="text-teal-700 font-bold hover:underline text-[11px]"
+                          >
+                            {hasil ? "Detail Hasil" : "Lihat Profil"}
+                          </Link>
                         </td>
                       </tr>
                     );

@@ -1,13 +1,17 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import BottomNav from "@/components/BottomNav";
-import { Award, Sparkles, ArrowRight, RotateCcw } from "lucide-react";
+import TopHeader from "@/components/TopHeader";
+import { getJenjangTheme } from "@/lib/theme";
+import { RIASEC_VISUAL, RiasecCode } from "@/lib/riasecData";
+import { Award } from "lucide-react";
 
 export default async function AssessmentResultPage() {
   const user = await getSession();
   if (!user) redirect("/login");
+
+  const theme = getJenjangTheme(user.jenjang);
 
   const latestResult = await prisma.riasecResult.findFirst({
     where: { userId: user.id },
@@ -18,72 +22,98 @@ export default async function AssessmentResultPage() {
     redirect("/assessment");
   }
 
-  const scores = [
-    { code: "R", name: "Realistic (Praktis)", desc: "Menyukai aktivitas fisik, alat perkakas, dan praktik di luar ruangan.", score: latestResult.skorR },
-    { code: "I", name: "Investigative (Pemikir)", desc: "Gemar mengamati, riset, belajar, dan menganalisis masalah kompleks.", score: latestResult.skorI },
-    { code: "A", name: "Artistic (Kreatif)", desc: "Jiwa ekspresif, orisinal, dan menyukai seni/kreativitas visual.", score: latestResult.skorA },
-    { code: "S", name: "Social (Penolong)", desc: "Senang membantu, mengajar, dan berinteraksi dengan orang lain.", score: latestResult.skorS },
-    { code: "E", name: "Enterprising (Pemimpin)", desc: "Memengaruhi orang lain, berani mengambil risiko, dan mengejar target.", score: latestResult.skorE },
-    { code: "C", name: "Conventional (Teratur)", desc: "Menyukai data, angka, dan sistem yang terstruktur rapi.", score: latestResult.skorC },
-  ];
+  const skorArr: Record<RiasecCode, number> = {
+    r: latestResult.skorR,
+    i: latestResult.skorI,
+    a: latestResult.skorA,
+    s: latestResult.skorS,
+    e: latestResult.skorE,
+    c: latestResult.skorC,
+  };
 
-  scores.sort((a, b) => b.score - a.score);
-  const top3 = scores.slice(0, 3);
-  const maxPossible = 5; // Total items per aspect approx
+  const persenArr = Object.fromEntries(
+    Object.entries(skorArr).map(([kode, skor]) => [kode, Math.round((skor / 7) * 100)])
+  ) as Record<RiasecCode, number>;
+
+  const top3 = (Object.entries(persenArr) as [RiasecCode, number][]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+  const namaDepan = user.name.split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 max-w-md mx-auto relative shadow-2xl">
-      <div className="bg-gradient-to-br from-purple-700 to-indigo-700 p-6 pt-10 text-white rounded-b-3xl text-center">
-        <div className="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-3 text-2xl border border-white/30">
-          🏆
-        </div>
-        <h1 className="text-2xl font-extrabold">Hasil Asesmen RIASEC</h1>
-        <p className="text-xs text-purple-200 mt-1">
-          Berikut adalah 3 profil kepribadian Holland paling dominan padamu:
-        </p>
-      </div>
+    <div className="min-h-screen bg-[#f8fafc] pb-24 max-w-md mx-auto relative shadow-2xl">
+      <TopHeader name={user.name} />
 
-      <div className="p-4 space-y-4">
-        {/* Top 3 Cards */}
-        <div className="space-y-3">
-          {top3.map((item, index) => (
-            <div
-              key={item.code}
-              className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-7 h-7 rounded-xl bg-purple-100 text-purple-700 font-black text-xs flex items-center justify-center">
-                    #{index + 1}
-                  </span>
-                  <h3 className="font-extrabold text-slate-800 text-sm">{item.name}</h3>
-                </div>
-                <span className="text-xs font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-full border border-purple-100">
-                  {item.score} Poin
-                </span>
-              </div>
-              <p className="text-xs text-slate-500 leading-relaxed mb-3">{item.desc}</p>
+      <main className="flex flex-col gap-5 px-4 pt-6 pb-12">
+        {/* Hero selamat */}
+        <div className="rounded-3xl p-6 shadow-lg relative overflow-hidden text-white text-center" style={theme.gradientStyle}>
+          <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />
+          <div className="absolute w-24 h-24 bg-white/10 rounded-full -bottom-8 -left-8" />
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="bg-white/20 border-2 border-white/40 w-16 h-16 rounded-full flex items-center justify-center mb-4">
+              <Award className="w-7 h-7" />
             </div>
-          ))}
+            <h1 className="text-2xl font-extrabold mb-3">Selamat, {namaDepan}!</h1>
+            <p className="text-white/85 text-sm">
+              Hasil tesmu telah selesai. Cek tipe minat dominanmu dan rekomendasi jurusan yang cocok di bawah ini.
+            </p>
+          </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-3">
-          <Link
-            href="/rekomendasi"
-            className="w-full inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs shadow-md shadow-purple-200 transition-all"
-          >
-            Lihat Rekomendasi Jurusan & SMK Terdekat <ArrowRight className="w-4 h-4" />
-          </Link>
+        {/* Profil minat dominan */}
+        <div className={`bg-white rounded-3xl p-6 shadow-sm border ${theme.accentBorder}`}>
+          <h2 className={`text-center ${theme.accentText} font-bold text-lg mb-8`}>Profil Minat Dominan</h2>
 
-          <Link
-            href="/assessment/questions"
-            className="w-full inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl text-xs transition-all"
-          >
-            <RotateCcw className="w-3.5 h-3.5" /> Ulangi Tes
-          </Link>
+          <div className="flex justify-center items-end gap-4 h-48">
+            {top3.map(([kode, persen]) => {
+              const data = RIASEC_VISUAL[kode];
+              return (
+                <div key={kode} className="flex flex-col items-center w-20">
+                  <div className="w-full bg-gray-100 rounded-t-lg h-32 relative overflow-hidden flex items-end">
+                    <div
+                      className={`w-full ${data.warna} flex items-center justify-center text-white font-bold text-xl transition-all duration-1000 ease-out`}
+                      style={{ height: `${persen}%` }}
+                    >
+                      {kode.toUpperCase()}
+                    </div>
+                  </div>
+                  <p className={`font-bold ${data.teksWarna} mt-3 text-sm`}>{persen}%</p>
+                  <p className="text-xs text-gray-800 font-medium">{data.nama}</p>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+
+        {/* Detail minat */}
+        <div>
+          <h2 className="text-lg font-bold text-gray-800 mb-3">Detail Minat Kamu</h2>
+
+          <div className="flex flex-col gap-4">
+            {top3.map(([kode]) => {
+              const data = RIASEC_VISUAL[kode];
+              return (
+                <div key={kode} className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow`}>
+                  <div className="flex gap-4">
+                    <div className={`w-12 h-12 rounded-xl ${data.bgWarna} ${data.teksWarna} flex items-center justify-center text-lg font-black shrink-0`}>
+                      {kode.toUpperCase()}
+                    </div>
+                    <div>
+                      <h3 className={`font-bold ${data.teksWarna} text-lg`}>
+                        {data.nama} ({data.label})
+                      </h3>
+                      <p className="text-gray-600 text-sm mt-1 leading-relaxed">{data.deskripsi}</p>
+                    </div>
+                  </div>
+                  <div className={`mt-4 ${theme.accentBg} rounded-xl p-4`}>
+                    <p className={`text-[11px] font-bold ${theme.accentText} tracking-widest mb-1.5`}>REKOMENDASI SMK:</p>
+                    <p className="text-sm font-medium text-gray-800">{data.rekomendasi}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </main>
 
       <BottomNav />
     </div>

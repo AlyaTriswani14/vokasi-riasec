@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, Radio, Send, Trash2, Bell } from "lucide-react";
+import { Send, Trash2, Bell } from "lucide-react";
+import KemendikdasmenNav from "../_components/KemendikdasmenNav";
+
+const LABEL_PENERIMA: Record<string, string> = { siswa: "Siswa", guru_bk: "Guru BK", semua: "Semua" };
 
 interface BroadcastItem {
   id: number;
@@ -71,26 +73,22 @@ export default function KemendikdasmenBroadcastPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Link
-          href="/kemendikdasmen/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
-        >
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-        </Link>
+    <div className="min-h-screen bg-[#f8fafc]">
+      <KemendikdasmenNav active="broadcast" />
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+        <div>
+          <span className="inline-block bg-[#003366] text-white text-[10px] font-bold px-3 py-1.5 rounded-full mb-2">
+            ADMIN DIREKTORAT SMK
+          </span>
+          <h1 className="text-xl font-extrabold text-slate-800">Broadcast &amp; Announcement Center</h1>
+          <p className="text-sm text-slate-500">
+            Kirim pengumuman ke siswa dan/atau Guru BK, bisa dipisah per jenjang.
+          </p>
+        </div>
 
         {/* Form Create Broadcast */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center">
-              <Radio className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-800">Broadcast Center (Pengumuman Massal)</h1>
-              <p className="text-xs text-slate-500">Kirim pemberitahuan penting ke pengguna platform</p>
-            </div>
-          </div>
+          <h2 className="font-bold text-slate-800 text-sm">Buat Broadcast Baru</h2>
 
           <form onSubmit={handleSend} className="space-y-3 pt-2">
             <div>
@@ -148,9 +146,9 @@ export default function KemendikdasmenBroadcastPage() {
             <button
               type="submit"
               disabled={sending}
-              className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-rose-200 flex items-center justify-center gap-2 text-xs transition-all mt-2"
+              className="w-full bg-[#003366] hover:bg-[#002855] text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 text-xs transition-all mt-2"
             >
-              <Send className="w-4 h-4" /> {sending ? "Mengirim Broadcast..." : "Kirim Broadcast Sekarang"}
+              <Send className="w-4 h-4" /> {sending ? "Mengirim Broadcast..." : "Kirim Broadcast"}
             </button>
           </form>
         </div>
@@ -158,7 +156,7 @@ export default function KemendikdasmenBroadcastPage() {
         {/* History Broadcast List */}
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4">
           <h2 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
-            <Bell className="w-5 h-5 text-rose-600" /> Riwayat Broadcast Pengumuman ({broadcasts.length})
+            <Bell className="w-5 h-5 text-[#003366]" /> Riwayat Broadcast ({broadcasts.length})
           </h2>
 
           <div className="space-y-3">
@@ -167,16 +165,29 @@ export default function KemendikdasmenBroadcastPage() {
             ) : (
               broadcasts.map((b) => (
                 <div key={b.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-100 relative">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div>
                       <h4 className="font-extrabold text-slate-800 text-xs">{b.subjek}</h4>
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        {new Date(b.createdAt).toLocaleString("id-ID")} • Target: {b.targetPenerima.toUpperCase()} ({b.targetJenjang.toUpperCase()})
-                      </span>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <span className="bg-blue-50 text-[#003366] text-[10px] font-bold px-2.5 py-1 rounded-full">
+                          {LABEL_PENERIMA[b.targetPenerima] || b.targetPenerima}
+                        </span>
+                        {b.targetJenjang === "smp" ? (
+                          <span className="bg-orange-50 text-[#c2410c] text-[10px] font-bold px-2.5 py-1 rounded-full">SMP</span>
+                        ) : b.targetJenjang === "smk" ? (
+                          <span className="bg-blue-50 text-[#2F6FED] text-[10px] font-bold px-2.5 py-1 rounded-full">SMK</span>
+                        ) : (
+                          <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2.5 py-1 rounded-full">Semua</span>
+                        )}
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          {new Date(b.createdAt).toLocaleDateString("id-ID")}
+                        </span>
+                      </div>
                     </div>
                     <button
                       onClick={() => handleDelete(b.id)}
-                      className="p-1 text-rose-600 hover:bg-rose-100 rounded-lg"
+                      className="p-1 text-red-500 hover:bg-red-100 rounded-lg shrink-0"
+                      title="Hapus broadcast ini"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>

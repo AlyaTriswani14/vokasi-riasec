@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, School, Plus, Search, Trash2, Users } from "lucide-react";
+import { School, Plus, Trash2 } from "lucide-react";
+import KemendikdasmenNav from "../_components/KemendikdasmenNav";
 
 interface GuruUser {
   id: number;
@@ -94,21 +94,25 @@ export default function KemendikdasmenUsersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Link
-            href="/kemendikdasmen/dashboard"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
-          >
-            <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-          </Link>
+    <div className="min-h-screen bg-[#f8fafc]">
+      <KemendikdasmenNav active="users" />
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+          <div>
+            <span className="inline-block bg-[#003366] text-white text-[10px] font-bold px-3 py-1.5 rounded-full mb-2">
+              ADMIN DIREKTORAT SMK
+            </span>
+            <h1 className="text-xl font-extrabold text-slate-800">Manajemen Sekolah</h1>
+            <p className="text-sm text-slate-500">
+              Daftar sekolah yang sudah mendaftarkan akun Guru BK, beserta jumlah siswa terdaftar.
+            </p>
+          </div>
 
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 bg-[#003366] hover:bg-[#0d3f70] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm transition-all"
+            className="inline-flex items-center gap-2 bg-[#003366] hover:bg-[#002855] text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-sm transition-all shrink-0"
           >
-            <Plus className="w-4 h-4" /> Tambah Sekolah / Guru BK
+            <Plus className="w-4 h-4" /> Tambah Sekolah
           </button>
         </div>
 
@@ -244,12 +248,25 @@ export default function KemendikdasmenUsersPage() {
                         <span className="font-semibold block text-slate-700">{u.name}</span>
                         <span className="text-[10px] text-slate-400">{u.email}</span>
                       </td>
-                      <td className="p-3 uppercase font-bold text-[10px]">{u.jenjang}</td>
-                      <td className="p-3 font-bold">{u.jumlah_siswa} Siswa</td>
+                      <td className="p-3">
+                        {u.jenjang === "smp" ? (
+                          <span className="bg-orange-50 text-[#c2410c] text-[10px] font-bold px-2.5 py-1 rounded-full">SMP</span>
+                        ) : u.jenjang === "smk" ? (
+                          <span className="bg-blue-50 text-[#2F6FED] text-[10px] font-bold px-2.5 py-1 rounded-full">SMK</span>
+                        ) : (
+                          <span className="bg-slate-100 text-slate-400 text-[10px] font-bold px-2.5 py-1 rounded-full">-</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <span className="bg-blue-50 text-[#003366] text-[10px] font-bold px-2.5 py-1 rounded-full">
+                          {u.jumlah_siswa} siswa
+                        </span>
+                      </td>
                       <td className="p-3">
                         <button
                           onClick={() => handleDelete(u.id)}
-                          className="p-1.5 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100"
+                          className="p-1.5 bg-red-50 text-red-500 rounded-lg hover:bg-red-100"
+                          title="Hapus sekolah ini"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

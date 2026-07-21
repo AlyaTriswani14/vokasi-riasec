@@ -1,19 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Compass, Sparkles, User } from "lucide-react";
+import { LayoutDashboard, FileText, Compass, Target, User } from "lucide-react";
+import { getJenjangTheme } from "@/lib/theme";
+
+// Order matches the original Blade bottom nav partial:
+// Dashboard, Assessment, Eksplorasi, Rekomendasi, Profil.
+const navItems = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/assessment", label: "Assessment", icon: FileText },
+  { href: "/eksplorasi", label: "Eksplorasi", icon: Compass },
+  { href: "/rekomendasi", label: "Rekomendasi", icon: Target },
+  { href: "/profil", label: "Profil", icon: User },
+];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [jenjang, setJenjang] = useState<string | null | undefined>(undefined);
 
-  const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/assessment", label: "Tes RIASEC", icon: FileText },
-    { href: "/rekomendasi", label: "Rekomendasi", icon: Sparkles },
-    { href: "/eksplorasi", label: "Eksplorasi", icon: Compass },
-    { href: "/profil", label: "Profil", icon: User },
-  ];
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => setJenjang(data?.user?.jenjang ?? null))
+      .catch(() => setJenjang(null));
+  }, []);
+
+  const { accentText } = getJenjangTheme(jenjang);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-lg px-4 py-2 flex justify-around items-center max-w-md mx-auto rounded-t-2xl">
@@ -24,8 +38,8 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-              isActive ? "text-purple-600 font-bold" : "text-slate-500 hover:text-purple-500"
+            className={`flex flex-col items-center gap-1 text-[10px] font-medium transition-colors ${
+              isActive ? `${accentText} font-bold` : "text-slate-400 hover:text-slate-600"
             }`}
           >
             <Icon className={`w-5 h-5 ${isActive ? "stroke-[2.5px]" : "stroke-[1.8px]"}`} />

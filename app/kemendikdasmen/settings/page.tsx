@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, Settings, Save, CheckCircle2 } from "lucide-react";
+import { Clock, Target, CalendarDays, Server, Save, CheckCircle2 } from "lucide-react";
+import KemendikdasmenNav from "../_components/KemendikdasmenNav";
 
 export default function KemendikdasmenSettingsPage() {
   const [durasiTesMenit, setDurasiTesMenit] = useState(5);
@@ -64,26 +64,18 @@ export default function KemendikdasmenSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <Link
-          href="/kemendikdasmen/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-slate-800"
-        >
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Dashboard
-        </Link>
+    <div className="min-h-screen bg-[#f8fafc]">
+      <KemendikdasmenNav active="settings" />
+      <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+        <div>
+          <span className="inline-block bg-[#003366] text-white text-[10px] font-bold px-3 py-1.5 rounded-full mb-2">
+            ADMIN DIREKTORAT SMK
+          </span>
+          <h1 className="text-xl font-extrabold text-slate-800">Pengaturan Sistem</h1>
+          <p className="text-sm text-slate-500">Konfigurasi umum platform Bakat Minat.</p>
+        </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
-              <Settings className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-800">Pengaturan Sistem Pusat</h1>
-              <p className="text-xs text-slate-500">Konfigurasi parameter tes & operasional aplikasi</p>
-            </div>
-          </div>
-
           {message && (
             <div className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs p-3.5 rounded-xl font-medium flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -99,7 +91,9 @@ export default function KemendikdasmenSettingsPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Durasi Tes Timer (Menit)</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#2F6FED] inline-block mr-1" /> Durasi Tes (menit)
+              </label>
               <input
                 type="number"
                 required
@@ -115,7 +109,9 @@ export default function KemendikdasmenSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Target Kuota Nasional (Siswa)</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <Target className="w-3.5 h-3.5 text-[#c2410c] inline-block mr-1" /> Target Kuota Nasional (siswa)
+              </label>
               <input
                 type="number"
                 required
@@ -127,10 +123,13 @@ export default function KemendikdasmenSettingsPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Tahun Ajaran</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <CalendarDays className="w-3.5 h-3.5 text-[#0f766e] inline-block mr-1" /> Tahun Ajaran
+                </label>
                 <input
                   type="text"
                   required
+                  placeholder="2026/2027"
                   value={tahunAjaran}
                   onChange={(e) => setTahunAjaran(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
@@ -138,14 +137,16 @@ export default function KemendikdasmenSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Status Operasional Sistem</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                  <Server className="w-3.5 h-3.5 text-green-600 inline-block mr-1" /> Status Sistem
+                </label>
                 <select
                   value={statusSistem}
                   onChange={(e) => setStatusSistem(e.target.value)}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm"
                 >
                   <option value="Aktif">Aktif</option>
-                  <option value="Pemeliharaan">Pemeliharaan (Maintenance)</option>
+                  <option value="Maintenance">Maintenance</option>
                 </select>
               </div>
             </div>
@@ -153,7 +154,7 @@ export default function KemendikdasmenSettingsPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#003366] hover:bg-[#0d3f70] text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 text-sm transition-all mt-4"
+              className="w-full bg-[#003366] hover:bg-[#002855] text-white font-bold py-3 rounded-xl shadow-lg shadow-blue-200 flex items-center justify-center gap-2 text-sm transition-all mt-4"
             >
               <Save className="w-4 h-4" /> {saving ? "Memproses..." : "Simpan Pengaturan"}
             </button>
