@@ -7,13 +7,12 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/_not-found/page-66b9b048b907cf5e.js"
     ],
-    "/layout": [
+    "/api/auth/lengkapi-profil/route": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/css/148e598f16e5e438.css",
-      "static/chunks/app/layout-4c0d149d2f996027.js"
+      "static/chunks/app/api/auth/lengkapi-profil/route-c5d96be8325b9aea.js"
     ],
     "/api/assessment/questions/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -29,19 +28,13 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/assessment/submit/route-c5d96be8325b9aea.js"
     ],
-    "/api/auth/lengkapi-profil/route": [
+    "/layout": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/auth/lengkapi-profil/route-c5d96be8325b9aea.js"
-    ],
-    "/api/auth/login/route": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/auth/login/route-c5d96be8325b9aea.js"
+      "static/css/6c6cf6d11afd395c.css",
+      "static/chunks/app/layout-4c0d149d2f996027.js"
     ],
     "/api/auth/logout/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -63,6 +56,13 @@
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/auth/session/route-c5d96be8325b9aea.js"
+    ],
+    "/api/auth/login/route": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/app/api/auth/login/route-c5d96be8325b9aea.js"
     ],
     "/api/guru-bk/export/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -92,19 +92,19 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/kemendikdasmen/broadcast/[id]/route-c5d96be8325b9aea.js"
     ],
-    "/api/kemendikdasmen/broadcast/route": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/kemendikdasmen/broadcast/route-c5d96be8325b9aea.js"
-    ],
     "/api/kemendikdasmen/login/route": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/kemendikdasmen/login/route-c5d96be8325b9aea.js"
+    ],
+    "/api/kemendikdasmen/broadcast/route": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/app/api/kemendikdasmen/broadcast/route-c5d96be8325b9aea.js"
     ],
     "/api/kemendikdasmen/questions/[id]/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -120,12 +120,12 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/kemendikdasmen/questions/route-c5d96be8325b9aea.js"
     ],
-    "/api/kemendikdasmen/settings/route": [
+    "/api/seed/route": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/kemendikdasmen/settings/route-c5d96be8325b9aea.js"
+      "static/chunks/app/api/seed/route-c5d96be8325b9aea.js"
     ],
     "/api/kemendikdasmen/users/[id]/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -141,19 +141,12 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/kemendikdasmen/users/route-c5d96be8325b9aea.js"
     ],
-    "/api/seed/route": [
+    "/api/kemendikdasmen/settings/route": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/seed/route-c5d96be8325b9aea.js"
-    ],
-    "/api/wilayah/kabupaten-kota/[kode]/route": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/wilayah/kabupaten-kota/[kode]/route-c5d96be8325b9aea.js"
+      "static/chunks/app/api/kemendikdasmen/settings/route-c5d96be8325b9aea.js"
     ],
     "/api/wilayah/kecamatan/[kode]/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -162,12 +155,12 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/wilayah/kecamatan/[kode]/route-c5d96be8325b9aea.js"
     ],
-    "/api/wilayah/kelurahan/[kode]/route": [
+    "/api/wilayah/kabupaten-kota/[kode]/route": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/api/wilayah/kelurahan/[kode]/route-c5d96be8325b9aea.js"
+      "static/chunks/app/api/wilayah/kabupaten-kota/[kode]/route-c5d96be8325b9aea.js"
     ],
     "/api/wilayah/provinsi/route": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -175,6 +168,13 @@
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/app/api/wilayah/provinsi/route-c5d96be8325b9aea.js"
+    ],
+    "/api/wilayah/kelurahan/[kode]/route": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/app/api/wilayah/kelurahan/[kode]/route-c5d96be8325b9aea.js"
     ],
     "/assessment/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -184,12 +184,13 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/assessment/page-d76b734637789728.js"
     ],
-    "/assessment/questions/page": [
+    "/dashboard/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/assessment/questions/page-eb86bc186398ce84.js"
+      "static/chunks/2619-3c9e02e22d10480a.js",
+      "static/chunks/app/dashboard/page-d76b734637789728.js"
     ],
     "/assessment/result/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -199,21 +200,12 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/assessment/result/page-d76b734637789728.js"
     ],
-    "/dashboard/page": [
+    "/assessment/questions/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
       "static/chunks/1255-d90f22433f14e976.js",
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/2619-3c9e02e22d10480a.js",
-      "static/chunks/app/dashboard/page-d76b734637789728.js"
-    ],
-    "/eksplorasi/page": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/2619-3c9e02e22d10480a.js",
-      "static/chunks/app/eksplorasi/page-d76b734637789728.js"
+      "static/chunks/app/assessment/questions/page-eb86bc186398ce84.js"
     ],
     "/guru-bk/daftar/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -223,14 +215,6 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/guru-bk/daftar/page-850184a8e9140f83.js"
     ],
-    "/guru-bk/login/page": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/2619-3c9e02e22d10480a.js",
-      "static/chunks/app/guru-bk/login/page-50d2a7057cb70288.js"
-    ],
     "/guru-bk/panel/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -238,6 +222,14 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/guru-bk/panel/page-c20e58f49ae9a085.js"
+    ],
+    "/guru-bk/login/page": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/2619-3c9e02e22d10480a.js",
+      "static/chunks/app/guru-bk/login/page-50d2a7057cb70288.js"
     ],
     "/guru-bk/siswa/[id]/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -255,6 +247,14 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/jurusan/[slug]/page-d76b734637789728.js"
     ],
+    "/kemendikdasmen/login/page": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/2619-3c9e02e22d10480a.js",
+      "static/chunks/app/kemendikdasmen/login/page-b55ab550dfd9eea2.js"
+    ],
     "/kemendikdasmen/broadcast/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -271,14 +271,6 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/kemendikdasmen/dashboard/page-c20e58f49ae9a085.js"
     ],
-    "/kemendikdasmen/login/page": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/2619-3c9e02e22d10480a.js",
-      "static/chunks/app/kemendikdasmen/login/page-b55ab550dfd9eea2.js"
-    ],
     "/kemendikdasmen/questions/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -286,6 +278,13 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/kemendikdasmen/questions/page-5b3fe55ebf2737ca.js"
+    ],
+    "/lengkapi-profil/page": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/app/lengkapi-profil/page-5bd670077f748428.js"
     ],
     "/kemendikdasmen/settings/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -302,13 +301,6 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/kemendikdasmen/users/page-220bfbc145dd2105.js"
-    ],
-    "/lengkapi-profil/page": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/app/lengkapi-profil/page-5bd670077f748428.js"
     ],
     "/login/page": [
       "static/chunks/webpack-d282787ed3063711.js",
@@ -342,14 +334,6 @@
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/pilih-admin/page-c20e58f49ae9a085.js"
     ],
-    "/profil/page": [
-      "static/chunks/webpack-d282787ed3063711.js",
-      "static/chunks/4bd1b696-f785427dddbba9fb.js",
-      "static/chunks/1255-d90f22433f14e976.js",
-      "static/chunks/main-app-2c6ddcc42eca02ed.js",
-      "static/chunks/2619-3c9e02e22d10480a.js",
-      "static/chunks/app/profil/page-27892dfe13d32f0a.js"
-    ],
     "/register/page": [
       "static/chunks/webpack-d282787ed3063711.js",
       "static/chunks/4bd1b696-f785427dddbba9fb.js",
@@ -365,6 +349,22 @@
       "static/chunks/main-app-2c6ddcc42eca02ed.js",
       "static/chunks/2619-3c9e02e22d10480a.js",
       "static/chunks/app/rekomendasi/page-d76b734637789728.js"
+    ],
+    "/profil/page": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/2619-3c9e02e22d10480a.js",
+      "static/chunks/app/profil/page-27892dfe13d32f0a.js"
+    ],
+    "/eksplorasi/page": [
+      "static/chunks/webpack-d282787ed3063711.js",
+      "static/chunks/4bd1b696-f785427dddbba9fb.js",
+      "static/chunks/1255-d90f22433f14e976.js",
+      "static/chunks/main-app-2c6ddcc42eca02ed.js",
+      "static/chunks/2619-3c9e02e22d10480a.js",
+      "static/chunks/app/eksplorasi/page-d76b734637789728.js"
     ]
   }
 }
