@@ -5,7 +5,16 @@ import BottomNav from "@/components/BottomNav";
 import TopHeader from "@/components/TopHeader";
 import { getJenjangTheme } from "@/lib/theme";
 import { RIASEC_VISUAL, RiasecCode } from "@/lib/riasecData";
-import { Award } from "lucide-react";
+import { Award, Wrench, Microscope, Palette, HeartHandshake, Megaphone, FileText } from "lucide-react";
+
+const RIASEC_ICONS: Record<RiasecCode, typeof Wrench> = {
+  r: Wrench,
+  i: Microscope,
+  a: Palette,
+  s: HeartHandshake,
+  e: Megaphone,
+  c: FileText,
+};
 
 export default async function AssessmentResultPage() {
   const user = await getSession();
@@ -63,11 +72,11 @@ export default async function AssessmentResultPage() {
         <div className={`bg-white rounded-3xl p-6 shadow-sm border ${theme.accentBorder}`}>
           <h2 className={`text-center ${theme.accentText} font-bold text-lg mb-8`}>Profil Minat Dominan</h2>
 
-          <div className="flex justify-center items-end gap-4 h-48">
+          <div className="flex justify-center items-end gap-4 md:gap-8 h-48">
             {top3.map(([kode, persen]) => {
               const data = RIASEC_VISUAL[kode];
               return (
-                <div key={kode} className="flex flex-col items-center w-20">
+                <div key={kode} className="flex flex-col items-center w-20 md:w-24">
                   <div className="w-full bg-gray-100 rounded-t-lg h-32 relative overflow-hidden flex items-end">
                     <div
                       className={`w-full ${data.warna} flex items-center justify-center text-white font-bold text-xl transition-all duration-1000 ease-out`}
@@ -91,11 +100,12 @@ export default async function AssessmentResultPage() {
           <div className="flex flex-col gap-4">
             {top3.map(([kode]) => {
               const data = RIASEC_VISUAL[kode];
+              const Icon = RIASEC_ICONS[kode];
               return (
                 <div key={kode} className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow`}>
                   <div className="flex gap-4">
-                    <div className={`w-12 h-12 rounded-xl ${data.bgWarna} ${data.teksWarna} flex items-center justify-center text-lg font-black shrink-0`}>
-                      {kode.toUpperCase()}
+                    <div className={`w-12 h-12 rounded-xl ${data.bgWarna} ${data.teksWarna} flex items-center justify-center text-2xl shrink-0`}>
+                      <Icon className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className={`font-bold ${data.teksWarna} text-lg`}>

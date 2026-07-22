@@ -5,11 +5,22 @@ import { useRouter } from "next/navigation";
 import BottomNav from "@/components/BottomNav";
 import TopHeader from "@/components/TopHeader";
 import { getJenjangTheme } from "@/lib/theme";
+import { TIPE_LABELS, RiasecCode } from "@/lib/riasecData";
 import { LogOut, Save } from "lucide-react";
 
 interface WilayahOption {
   kode: string;
   nama: string;
+}
+
+interface HasilTes {
+  createdAt: string;
+  skorR: number;
+  skorI: number;
+  skorA: number;
+  skorS: number;
+  skorE: number;
+  skorC: number;
 }
 
 export default function ProfilPage() {
@@ -36,9 +47,24 @@ export default function ProfilPage() {
   const [updating, setUpdating] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [hasilTes, setHasilTes] = useState<HasilTes | null>(null);
 
   const theme = getJenjangTheme(jenjang);
   const kelasOptions = theme.isSmk ? ["10", "11", "12", "13"] : ["7", "8", "9"];
+
+  const top3: [RiasecCode, number][] = hasilTes
+    ? (Object.entries({
+        r: hasilTes.skorR,
+        i: hasilTes.skorI,
+        a: hasilTes.skorA,
+        s: hasilTes.skorS,
+        e: hasilTes.skorE,
+        c: hasilTes.skorC,
+      }) as [RiasecCode, number][])
+        .map(([kode, skor]) => [kode, Math.round((skor / 7) * 100)] as [RiasecCode, number])
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 3)
+    : [];
 
   // Load session + initial wilayah chain
   useEffect(() => {
@@ -60,6 +86,7 @@ export default function ProfilPage() {
         setKabupatenKota(u.kabupaten_kota || "");
         setKecamatan(u.kecamatan || "");
         setKelurahan(u.kelurahan || "");
+        setHasilTes(data.hasilTes || null);
 
         // Load provinsi list, then cascade down to restore saved selections.
         const provRes = await fetch("/api/wilayah/provinsi").then((r) => r.json());
@@ -192,6 +219,32 @@ export default function ProfilPage() {
           <p className="text-xs text-gray-500 mt-2">
             NISN: {nisn || "-"} &bull; {asalSekolah || "-"}
           </p>
+        </div>
+
+        {/* Hasil tes terakhir */}
+        <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
+          <div className="flex justify-between items-center mb-3">
+            <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase">Hasil Tes Terakhir</p>
+            <span className="text-[10px] text-gray-400 font-medium">
+              {hasilTes
+                ? new Date(hasilTes.createdAt).toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+                : "-"}
+            </span>
+          </div>
+          {hasilTes ? (
+            <div className="grid grid-cols-3 gap-2">
+              {top3.map(([kode, persen], idx) => (
+                <div key={kode} className={`rounded-xl ${theme.accentBg} p-3 text-center`}>
+                  <p className="text-[10px] font-bold text-gray-400 mb-0.5">#{idx + 1}</p>
+                  <p className={`font-extrabold ${theme.accentText} text-base`}>{kode.toUpperCase()}</p>
+                  <p className="text-[10px] font-medium text-gray-500 mb-1">{TIPE_LABELS[kode]}</p>
+                  <p className="text-xs font-bold text-gray-700">{persen}%</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-500 text-center py-2">Belum ada hasil tes yang tersimpan.</p>
+          )}
         </div>
 
         {/* Data diri */}

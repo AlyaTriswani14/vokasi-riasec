@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import BottomNav from "@/components/BottomNav";
 import TopHeader from "@/components/TopHeader";
 import { getJenjangTheme, RIASEC_LABELS } from "@/lib/theme";
-import { Check, Compass, Megaphone } from "lucide-react";
+import { Check, Compass, Megaphone, User } from "lucide-react";
 
 export default async function DashboardPage() {
   const user = await getSession();
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
           <div className="absolute w-32 h-32 bg-white/15 rounded-full -top-10 -right-10" />
           <div className="relative z-10 flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-white/20 border-2 border-white/40 flex items-center justify-center text-2xl shrink-0">
-              🎓
+              <User className="w-6 h-6" />
             </div>
             <div>
               <p className="text-xs text-white/80 mb-0.5">Halo, semangat terus!</p>
@@ -72,7 +72,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Status + hasil terakhir */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className={`bg-white border ${theme.accentBorder} rounded-2xl p-5 shadow-sm`}>
             <p className="text-[10px] font-bold text-gray-400 tracking-wider uppercase mb-2">Status Tes Minat</p>
             <div className="flex items-center gap-2 mb-3">
